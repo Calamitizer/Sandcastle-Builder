@@ -12459,8 +12459,11 @@ Molpy.Coallate = function(){
 					cost *= Math.pow(Math.floor(Math.log(m)) , -1/8);
 				}
 				cost = Math.floor(cost);
-				var tatpix = Molpy.largestNPvisited[0.1] // highest tatpix visited
-				var yield = Molpy.Got('Green Sun')? Math.floor(Math.pow(4,tatpix/4)) : 1
+				var tatpix = Molpy.largestNPvisited[0.1]; // highest tatpix visited
+				var yield = 1;
+				yield *= Molpy.Got('Windowed Mode') ? 4 : 1;
+				yield *= Molpy.Got('Time Compression') && Math.abs(Molpy.newpixNumber) <= 240 ? 2 : 1);
+				yield *= Molpy.Got('Green Sun') ? Math.floor(Math.pow(4,tatpix/4)) : 1;
 				str += ', using infinite flux crystals';
 				str += '.<br><input type=button onclick="Molpy.Uncrush(' + cost + ',' + yield + ')" value="Uncrush"></input> ';
 				str += Molpify(cost) + ' shard' + plural(cost) + ' into ' + Molpify(yield) + ' pane' + plural(yield) + '.';
@@ -13053,6 +13056,7 @@ Molpy.Coallate = function(){
 			Goats: Infinity,
 			FluxCrystals: Infinity,
 			Vacuum: 1e54,
+			Shards: 5e13,
 		},
 		IsEnabled: Molpy.BoostFuncs.PosPowEnabled,
 		// To reduce the wait time to recharge the goat battery
@@ -13691,6 +13695,27 @@ Molpy.Coallate = function(){
 			buyFunction: function(){this.power=1}
 		}
 	);
+	new Molpy.Boost({
+			name: 'Windowed Mode',
+			desc: 'Quadruples pane creation',
+			group: 'dimen',
+			price: {
+				Panes: 5 * 48,
+			},
+		}
+	);
+	new Molpy.Boost({
+			name: 'Time Compression',
+			desc: 'The Anticausal Autoclave yields double panes during shortpix',
+			group: 'dimen',
+			price: {
+				FluxCrystals: Infinity,
+				Shards: 5 * 40880,
+				Panes: 5 * 24,
+			},
+			buyFunction: Molpy.Notify('...All existence denied.',1);
+		}
+	);	
 
 // END OF BOOSTS, add new ones immediately before this comment
 }
