@@ -712,31 +712,6 @@ Molpy.CheckCaps = function() {
 // 	'Blackprint Construction',
 // ]);
 
-
-Molpy.AddTarget = function(target) {
-		Molpy.glows[target.alias] = target.power;
-}
-
-// Molpy.BuildGlows = function() {
-// 	var targets = {};
-// 	var target = 0;
-// 	for (var i = 0; i < Molpy.stuffs.length; i++) {
-// 			target = Molpy.Boosts[Molpy.stuffs[i]];
-// 			Molpy.Notify(target);
-// 			Molpy.AddTarget(target);
-// 	}
-// 	Molpy.glows['Stealth streak'] = 2;
-// 	Molpy.glows['Ritual streak'] = 2
-// 	Molpy.glows['the Pope'] = 2
-// 	Molpy.glows['Shortrifts'] =2 
-// 	Molpy.glows['Cryogenics'] = 2
-// 	Molpy.glows['Vaults'] = 2
-// 	Molpy.glows['Salve'] = 2
-// 	Molpy.glows['Lucky Twin'] =2
-// 	Molpy.glows['Blackprint Construction'] = 2
-// 	return;
-// }
-
 Molpy.CheckBuyUnlocks = function(tool) {
 	if(Molpy.needlePulling) return;
 	var me = Molpy.SandTools['Bucket'];
