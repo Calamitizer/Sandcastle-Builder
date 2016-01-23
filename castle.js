@@ -3211,7 +3211,7 @@ Molpy.Up = function() {
 					if (!Molpy.Got('Glass Ceiling ' + i)) {
 						factor *= (np % i ? 1/i : i);
 					}
-					if (Molpy.Got('Glass Ceiling ' + i) == Math.sign(np % i)) {
+					if (Molpy.Got('Glass Ceiling ' + i) == Math.abs(Math.sign(np % i))) {
 						strikes++;
 					}
 					if (strikes == 10) {
@@ -3272,7 +3272,13 @@ Molpy.Up = function() {
 			var me = Molpy.Boosts[i];
 			if(me.bought && me.countdown) {
 			        if ((me.countdownCMS || !Molpy.Boosts['Coma Molpy Style'].IsEnabled)) {
-					me.countdown--;
+						if (me.countdowncheck) {
+							if (me.countdowncheck()) {
+								me.countdown--;
+							}
+						} else {
+							me.countdown--;
+						}
 					if(me.countdown <= 0) {
 						if(me.countdownLockFunction) {
 							me.countdownLockFunction()
@@ -3355,6 +3361,8 @@ Molpy.Up = function() {
 				if (!isFinite(Molpy.Level('FluxCrystals'))) Molpy.UnlockBoost('Black Hole');
 			}
 		}
+
+		Molpy.Dust();
 
 		Molpy.Boosts['GlassBlocks'].calculateBlocksPermNP();
 		Molpy.Boosts['GlassChips'].calculateChipsPermNP();
@@ -3554,6 +3562,19 @@ Molpy.Up = function() {
 		if(Molpy.Got('Photoelectricity')) earn('UnDuoNonUnium')
 		if(Molpy.Got('Diluted Boom') && Molpy.Got('Concentrated Boom')) earn('Ghost Bomb')
 		if(gray>=1000) earn('Wish I could breathe')
+	}
+
+	Molpy.Dust = function() {
+		if (Molpy.Got('Moondrizzle')) {
+			var dust = Molpy.Boosts['Moondust'].power
+			var riser = Molpy.Boosts['Moon Spire']
+			var driz = 1;
+			Molpy.Add('Moondust', driz);
+			if (dust >= 5000) Molpy.UnlockBoost('Moon Spire')
+			if (Molpy.Got('Moon Spire') && !Molpy.Got('Spire Work Order') && !Molpy.Got('Spire Construction')) {
+				if (dust >= .8 * riser.reqtime() * riser.mdcost()) Molpy.UnlockBoost('Spire Work Order')
+			}
+		}
 	}
 
 	Molpy.PerformJudgement = function() {

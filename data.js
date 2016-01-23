@@ -619,7 +619,123 @@ Molpy.HardcodedData = function() {
 	]
 }
 
+Molpy.stuffs = [
+	'Sand',
+	'Castles',
+	'GlassChips',
+	'GlassBlocks',
+	'Logicat',
+	'Blackprints',
+	'Goats',
+	'Bonemeal',
+	'Mustard',
+	'Maps',
+	'FluxCrystals',
+	'Vacuum',
+	'QQ',
+	'Diamonds',
+	'Gold',
+	'Princesses',
+	'Coal',
+	'exp',
+	'Shards',
+	'Panes',
+	'Blueness',
+	'Otherness',
+	'Blackness',
+	'Whiteness',
+	'Grayness',
+	'Moondust',
+	'Starstuff',
+];
+
+
+Molpy.glows = {};
+
+Molpy.BuildGlows = function() {
+	var addglowstuff = function(bacon) {
+		Molpy.glows[bacon.alias] = {
+			mdcheck: function() {return Molpy.Got(bacon.alias) && bacon.power != Infinity},
+			// can you fire Moondust at it?
+			sscheck: function() {return Molpy.Got(bacon.alias) && bacon.power >= 10 && bacon.power != Infinity},
+			// can you fire Starstuff/uSols at it? (or rather, does it appear in the list? still subject to cap)
+			aqcheck: function() {return Molpy.Got(bacon.alias) && bacon.power != 0},
+			// can you fire Antiquanta at it?
+			tccheck: function() {return true},
+			// can you fire tachyons at it?
+			val: bacon.power,
+			isstuff: 1,
+		}
+	}
+	for (var i = 0; i < Molpy.stuffs.length; i++) {
+		addglowstuff(Molpy.Boosts[Molpy.stuffs[i]]);
+	}
 	
+	var addglowother = function(nom, val, extra) {
+		Molpy.glows[nom] = {
+			mdcheck: function() {return (extra ? extra() : true) && val != Infinity},
+			sscheck: function() {return (extra ? extra() : true) && val >= 10 && val != Infinity},
+			aqcheck: function() {return (extra ? extra() : true) && val != 0},
+			tccheck: function() {return false},
+			val: val,
+		}
+	}
+	addglowother('Ninja Stealth', Molpy.ninjaStealth);
+	addglowother('Ritual Streak', Molpy.Boosts['Ninja Ritual'].power, function() {return Molpy.Boosts['Ninja Ritual'].power < 1e298});
+	// cap
+	addglowother('the Pope', Molpy.Boosts['Permanent Staff'].Level, function() {return Molpy.Boosts['Permanent Staff'].power < 144});
+	addglowother('Shortrifts', Molpy.Boosts['Safety Net'].power, function() {return Molpy.Boosts['Safety Net'].power < 555});
+	addglowother('Cryogenics', Molpy.Boosts['Cryogenics'].power);
+	addglowother('Vaults', Molpy.Boosts['Locked Vault'].power);
+	addglowother('Panther Salve', Molpy.Boosts['Panther Salve'].power, function() {return Molpy.Boosts['Panther Salve'].power <= 1200});
+	addglowother('Lucky Twin', Molpy.Boosts['Lucky Twin'].power, function() {return Molpy.Boosts['Lucky Twin'].power < 13 * 13});
+}
+
+Molpy.CheckCaps = function() {
+	for (var key in Molpy.Boosts['Glowitzer'].caps[0]) {
+		if (Molpy.glows[key].val >= Molpy.Boosts['Glowitzer'].caps[0][key]) {
+			delete caps[0][key];
+		}
+	}
+}
+
+// Molpy.glows = Molpy.stuffs.concat([
+// 	'Stealth Streak',
+// 	'Ritual Streak',
+// 	'The Pope',
+// 	'Shortrifts',
+// 	'Cryogenics',
+// 	'Vaults',
+// 	'Panther Salve',
+//  'VJ',
+// 	'Lucky Twin',
+// 	'Blackprint Construction',
+// ]);
+
+
+Molpy.AddTarget = function(target) {
+		Molpy.glows[target.alias] = target.power;
+}
+
+// Molpy.BuildGlows = function() {
+// 	var targets = {};
+// 	var target = 0;
+// 	for (var i = 0; i < Molpy.stuffs.length; i++) {
+// 			target = Molpy.Boosts[Molpy.stuffs[i]];
+// 			Molpy.Notify(target);
+// 			Molpy.AddTarget(target);
+// 	}
+// 	Molpy.glows['Stealth streak'] = 2;
+// 	Molpy.glows['Ritual streak'] = 2
+// 	Molpy.glows['the Pope'] = 2
+// 	Molpy.glows['Shortrifts'] =2 
+// 	Molpy.glows['Cryogenics'] = 2
+// 	Molpy.glows['Vaults'] = 2
+// 	Molpy.glows['Salve'] = 2
+// 	Molpy.glows['Lucky Twin'] =2
+// 	Molpy.glows['Blackprint Construction'] = 2
+// 	return;
+// }
 
 Molpy.CheckBuyUnlocks = function(tool) {
 	if(Molpy.needlePulling) return;

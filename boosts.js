@@ -25,6 +25,7 @@ Molpy.DefineBoosts = function() {
 	        faves: ['favourites', 'Favourites'],
 		magic: ['magic', 'Magic'],
 		dimen: ['dimension tech', 'Dimension Tech'],
+		lunar: ['lunacy', 'Lunacy'],
 		varie: ['variegation', 'Variegation', 'varie'],
 	};
 	
@@ -12462,7 +12463,7 @@ Molpy.Coallate = function(){
 				var tatpix = Molpy.largestNPvisited[0.1]; // highest tatpix visited
 				var yield = 1;
 				yield *= Molpy.Got('Windowed Mode') ? 4 : 1;
-				yield *= Molpy.Got('Time Compression') && Math.abs(Molpy.newpixNumber) <= 240 ? 2 : 1);
+				yield *= Molpy.Got('Time Compression') && Math.abs(Molpy.newpixNumber) <= 240 ? 2 : 1;
 				yield *= Molpy.Got('Green Sun') ? Math.floor(Math.pow(4,tatpix/4)) : 1;
 				str += ', using infinite flux crystals';
 				str += '.<br><input type=button onclick="Molpy.Uncrush(' + cost + ',' + yield + ')" value="Uncrush"></input> ';
@@ -12485,6 +12486,15 @@ Molpy.Coallate = function(){
 			Molpy.Notify('' + Molpify(cost) + ' dimension shard' + plural(cost) + ' uncrushed into ' + Molpify(yield) + ' pane' + plural(yield) + '.', 0);
 			if (Molpy.Boosts['Locked Vault'].power > 1e21 && Molpy.IsEnabled('Mario')) {
 				Molpy.UnlockBoost('Vise');
+			}
+			if (Math.abs(Molpy.newpixNumber) <= 240) {
+				Molpy.Boosts['Time Compression'].power++;
+				if (Molpy.Boosts['Time Compression'].power >= 48) {
+					Molpy.UnlockBoost('Time Compression');
+				}
+				if (Molpy.Boosts['Time Compression'].power >= 120) {
+					Molpy.UnlockBoost('Windowed Mode');
+				}
 			}
 			if (Molpy.Boosts['AntiAuto'].Level >= 60) {
 				Molpy.UnlockBoost('Never Jam Today');
@@ -13696,16 +13706,8 @@ Molpy.Coallate = function(){
 		}
 	);
 	new Molpy.Boost({
-			name: 'Windowed Mode',
-			desc: 'Quadruples pane creation',
-			group: 'dimen',
-			price: {
-				Panes: 5 * 48,
-			},
-		}
-	);
-	new Molpy.Boost({
 			name: 'Time Compression',
+			icon: 'timecompression',
 			desc: 'The Anticausal Autoclave yields double panes during shortpix',
 			group: 'dimen',
 			price: {
@@ -13713,9 +13715,431 @@ Molpy.Coallate = function(){
 				Shards: 5 * 40880,
 				Panes: 5 * 24,
 			},
-			buyFunction: Molpy.Notify('...All existence denied.',1);
+			buyFunction: function() {Molpy.Notify('...All existence denied.',1)},
 		}
 	);	
+	new Molpy.Boost({
+			name: 'Windowed Mode',
+			icon: 'windowed',
+			desc: 'Quadruples pane creation',
+			group: 'dimen',
+			price: {
+				Shards: 5 * 1e10,
+				Panes: 5 * 48,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+		name: 'Moondust',
+		plural: 'Moondust',
+		icon: 'moondust',
+		group: 'stuff',
+		desc: function(me) {
+			var str = ''
+			str += 'Little bits of something from far, far above.'
+			str += ' You have ' + Molpify(me.Level, 3) + ' Moondust.';
+			return str;
+		},
+		defStuff: 1
+	});
+
+	new Molpy.Boost({
+		name: 'Starstuff',
+		plural: 'Starstuff',
+		icon: 'Starstuff',
+		group: 'stuff',
+		desc: function(me) {
+			var str = ''
+			str += 'It\'s hard to tell if something is very small and very close or very large and very far. '
+			str += 'You have ' + Molpify(me.Level, 3) + ' Moondust.';
+			return str;
+		},
+		defStuff: 1
+	});
+
+	new Molpy.Boost({
+			name: 'Moondrizzle',
+			icon: 'moondrizzle',
+			desc: 'You\'re collecting a trickle of Moondust.',
+			group: 'lunar',
+			unlockFunction: function() {
+				this.buy();
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Moon Spire',
+			title: function(me) {
+				var str = 'Moon Spire';
+				if (me.Level) {
+					return str;
+				}
+				if (me.location) {
+					str += ' Base';
+					return str;
+				} else {
+					str += ' Plans';
+					return str;
+				}
+			},
+			icon: 'spire',
+			desc: function(me) {
+				var str = '';
+				str += 'An ambitious edifice for celestial exploration.';
+				if (me.location) {
+					str += '<br>Your Moon Spire is located at NP ' + me.location + '.';
+				}
+				if (me.Level) {
+					str += '<br>It has ' + me.Level + ' floor' + plural(me.Level) + '.';
+				}
+				if (!me.Level && !Molpy.Got('Spire Construction')) {
+					str += '<br>Decide where to put the spire, then start construction!';
+				}
+				return str;
+			},
+			group: 'lunar',
+			buyFunction: function() {
+				Molpy.UnlockBoost('Spire Work Order');
+			},
+			price: {
+				Moondust: 5 * 10000,
+				Blackprints: 5 * 1000,
+			},
+			Level: 0,
+			location: undefined,
+			reqtime: function() {
+				return 1000 + 100 * this.Level;
+			},
+			mdcost: function() {
+				return 1 + Math.floor(this.Level / 10);
+			},
+			defSave: 1,
+			saveData: {4: ['Level', 0,'int'],
+			           5: ['location', undefined, 'int'],
+			}
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Spire Work Order',
+			icon: 'workorder',
+			desc: function(me) {
+				var riser = Molpy.Boosts['Moon Spire'];
+				var str = '';
+				if (!me.bought) {
+					str += 'Allows you to begin construction of ' + (riser.Level ? 'another floor of' : 'the') + ' Moon Spire.';
+					return str;
+				}
+				str += '<input type="Button" value="Start" onclick="Molpy.Rise()"></input> construction of ' + (riser.Level ? 'floor ' + Molpify(riser.Level + 1): 'the spire') + '!';
+				str += '<br>This will require ' + Molpify(riser.reqtime()) + ' mNP at ' + (riser.Level ? 'floor ' + riser.Level : 'NP ' + Molpy.newpixNumber) + (riser.md ? ', and ' + Molpify(riser.mdcost()) + ' Moondust/mNP' : '') + '. (Construction is not aborted if you run out.)';
+				if (!riser.location) {
+					str += '<br><b>Caution:</b> Clicking that button will <small>(semi-)</small>permanently fix the spire on your current location. Build somewhere smart!'; 
+				}
+				return str;
+			},
+			group: 'lunar',
+			priceFunction: function() {
+				return {Blackprints: 5 * Molpy.Boosts['Moon Spire'].Level * 100 };
+			},
+		}
+	);
+
+	Molpy.Rise = function() {
+		var riser = Molpy.Boosts['Moon Spire'];
+		Molpy.LockBoost('Spire Work Order');
+		if (!riser.location) {
+			riser.location = Molpy.newpixNumber;	
+		}
+		Molpy.GiveTempBoost('Spire Construction', 0, riser.reqtime(), 0);
+		return;
+	}
+
+	new Molpy.Boost({
+		name: 'Spire Construction',
+		title: function(me) {
+			var str = ''
+			str += 'Assembling Floor ' + (Molpy.Boosts['Moon Spire'].Level + 1);
+			return str;
+		},
+		icon: '',
+		className: 'alert',
+		group: 'lunar',
+		
+		desc: function(me) {
+			var riser = Molpy.Boosts['Moon Spire'];
+			var str = '';
+			str += 'Construction of floor ' + Molpify(riser.Level + 1) + ' is currently in progress. ';
+			str += 'It will be complete after spending ' + Molpify(me.countdown) + ' mNP. at ';
+			str += (riser.Level ? 'floor ' + riser.Level : 'NP ' + riser.location) + ', spending ';
+			str += riser.mdcost() + ' Moondust/mNP.';
+			return str;
+		},
+		
+		unlockFunction: function() {
+			this.buy();
+		},
+		
+		lockFunction: function() {
+			Molpy.Boosts['Moon Spire'].Level++;
+		},
+		countdowncheck: function() {
+			var riser = Molpy.Boosts['Moon Spire']
+			return (Molpy.newpixNumber == (riser.Level ? riser.Level : riser.location) && Molpy.Spend('Moondust', riser.mdcost()));
+		},
+	});
+
+	new Molpy.Boost({
+			name: 'Glowitzer',
+			icon: 'glowitzer',
+			className: 'action',
+			desc: function(me) {
+				var str = '';
+				if (!me.bought) {
+					str += 'Fires stuff at things for reasons.';
+					return str;
+				}
+				str += 'Load it with various celestial bits and fire it at something for certain effects. Experiment!';
+				if (Molpy.Got('Overglare')) {
+					str += '<br>The Glowitzer is currently cooling. It will be ready to fire in ';
+					str += Molpify(Molpy.Boosts['Overglare'].countdown) + ' mNP.';
+					return str;
+				}	
+				if (!me.chamber) {
+					var counts = 0;
+					var ammo = me.ammo
+					str += '<br><b>Load</b> the Glowitzer with';
+					for (i = 0; i < ammo.length; i++) {
+						if (Molpy.Got(ammo[i]) && Molpy.Boosts[ammo[i]].power) {
+							counts++;
+							str += '<br><input type="Button" value="' + ammo[i] + '" onclick="Molpy.Ready(\'' + ammo[i] + '\')"></input>';
+						}
+					}
+					if (!counts) {
+						str += 'You don\'t have any suitable ammo!';
+						// badge? this is kind of hard to make happen
+					}
+				} else if (!me.target) {
+					Molpy.BuildGlows();
+					var stuffs = Molpy.stuffs;
+					var counts = 0;
+					str += '<br>Currently loaded with ' + me.chamber + '.';
+					str += '<br><b>Aim</b> the Glowitzer at';
+					if (me.chamber == 'Moondust') {
+						for (key in Molpy.glows) {
+							if (Molpy.glows[key].mdcheck()) {
+								counts++;
+								str += '<br><center><input type="Button" value="' + me.formatName(key);
+								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
+							}
+						}
+					}
+					if (me.chamber == 'Starstuff') {
+						for (key in Molpy.glows) {
+							if (Molpy.glows[key].sscheck()) {
+								counts++;
+								str += '<br><center><input type="Button" value="' + me.formatName(key);
+								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
+							}
+						}
+					}
+					if (me.chamber == 'Antiquanta') {
+						for (key in Molpy.glows) {
+							if (Molpy.glows[key].aqcheck()) {
+								counts++;
+								str += '<br><center><input type="Button" value="' + me.formatName(key);
+								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
+							}
+						}
+					}
+					if (me.chamber == 'Tachyons') {
+						for (key in Molpy.glows) {
+							if (Molpy.glows[key].tccheck()) {
+								counts++;
+								str += '<br><center><input type="Button" value="' + me.formatName(key);
+								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
+							}
+						}
+					}
+					if (!counts) {
+						str += 'No valid target!';
+						
+					}
+				} else {
+					str += '<br>Currently loaded with ' + me.chamber + ' and aimed at ' + me.target + '.';
+					str += '<br><input type="Button" value="Fire" onclick="Molpy.Fire()"></input>';
+					str += ' the Glowitzer!';
+				}
+				return str;
+			},
+			group: 'lunar',
+			price: {
+				Sand: 1,
+			},
+			ammo: ['Moondust', 'Starstuff', 'uSols', 'Antiquanta', 'Tachyons'],
+			factors: {
+				'Starstuff': 1.2,
+				'uSols': 2.0,
+				'Antiquanta': 0.0,
+				'Tachyons': Infinity,
+			},
+			chamber: '',
+			target: '',
+			caps: [{}],
+			formatName: function(stuff) {
+				if (stuff == 'Logicat') return 'the Logicat';
+				if (stuff == 'Vacuum') return 'Vacuums';
+				if (stuff == 'QQ') return 'Qubes';
+				if (stuff == 'exp') return 'EXP';
+				if (stuff == 'Shards') return 'Shards';
+				if (stuff == 'Panes') return 'Panes';
+				return stuff;
+			},
+			defSave: 1,
+			saveData: {
+				4: ['chamber', '', 'string'],
+				5: ['target', '', 'string'],
+				6: ['caps', [{}], 'array'],
+		}
+	});
+	
+	Molpy.Ready = function(ammo) {
+		if (Molpy.Spend(ammo, 1)) {
+			Molpy.Boosts['Glowitzer'].chamber = ammo;
+			Molpy.Notify('Loaded the Glowitzer with ' + ammo + '!');
+		} else {
+			Molpy.Notify('That ammo has mysteriously vanished. 2spoop!');
+		}
+		Molpy.Boosts['Glowitzer'].Refresh()
+		return;
+	}
+	
+	Molpy.Aim = function(target) {
+		var glow = Molpy.Boosts['Glowitzer'];
+		if (glow.caps[0][target]) {
+			Molpy.Notify('That\'s too irradiated!');
+			Molpy.Boosts['Geiger Counter'].power++;
+			if (Molpy.Boosts['Geiger Counter'].power >= 4) {
+				Molpy.UnlockBoost('Geiger Counter');
+			}
+			return;
+		}
+		glow.target = target;
+		Molpy.Notify('Aimed the Glowitzer at ' + target + '!');
+		glow.Refresh();
+		return;
+	}
+
+	Molpy.Fire = function() {
+		var glow = Molpy.Boosts['Glowitzer'];
+		var glows = Molpy.glows;
+		var effect = function() {
+			return (glow.chamber == 'Moondust' ? function(x) {return x + 1} : function(x) {return Math.floor(x * glow.factors[glow.chamber])})
+		}
+		if (glows[glow.target].isstuff) {
+			Molpy.Boosts[glow.target].power = effect()(Molpy.Boosts[glow.target].power);
+			glow.caps[0][glow.target] = effect()(Molpy.Boosts[glow.target].power);
+		} else if (glow.target == 'Ninja Stealth') {
+			Molpy.ninjaStealth = effect()(Molpy.ninjaStealth);
+			glow.caps[0][glow.target] = effect()(Molpy.ninjaStealth);
+		} else if (glow.target == 'Ritual Streak') {
+			Molpy.Boosts['Ninja Ritual'].power = Math.max(effect()(Molpy.Boosts['Ninja Ritual'].power), 1e298);
+			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Ninja Ritual'].power);
+		} else if (glow.target == 'the Pope') {
+			Molpy.Boosts['Permanent Staff'].Level = effect()(Molpy.Boosts['Permanent Staff'].Level);
+			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Permanent Staff'].Level);
+		} else if (glow.target == 'Shortrifts') {
+			Molpy.Boosts['Safety Net'].power = effect()(Molpy.Boosts['Safety Net'].power);
+			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Safety Net'].power);
+		} else if (glow.target == 'Cryogenics') {
+			Molpy.Boosts['Cryogenics'].power = effect()(Molpy.Boosts['Cryogenics'].power);
+			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Cryogenics'].power);
+		} else if (glow.target == 'Vaults') {
+			Molpy.Boosts['Locked Vault'].power = effect()(Molpy.Boosts['Locked Vault'].power);
+			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Locked Vault'].power);
+		} else if (glow.target == 'Panther Salve') {
+			Molpy.Boosts['Panther Salve'].power = effect()(Molpy.Boosts['Panther Salve'].power);
+			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Panther Salve'].power);
+		} else if (glow.target == 'Lucky Twin') {
+			Molpy.Boosts['Lucky Twin'].power = effect()(Molpy.Boosts['Lucky Twin'].power);
+			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Lucky Twin'].power);
+		}	
+		
+		Molpy.Notify('Fired ' + glow.chamber + ' at ' + glow.target + '!');
+		Molpy.GiveTempBoost('Overglare');
+		glow.chamber = '';
+		glow.target = '';
+		glow.power++;
+		glow.Refresh();
+		return;
+	}
+
+// <input type="Button" value="Click" onclick="Molpy.ChromaticHeresyToggle()"></input>
+
+	new Molpy.Boost({
+			name: 'Overglare',
+			icon: 'overglare',
+			className: 'alert',
+			desc: function(me) {
+				var str = '';
+				str += 'The Glowitzer is cooling for ' + Molpify(me.countdown) + ' mNP';
+				return str;
+			},
+			group: 'lunar',
+			startCountdown: function() {
+				return 3;
+				// make dynamic
+			}
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Geiger Counter',
+			icon: 'geigercounter',
+			desc: function(me) {
+				var str = '';
+				if (!me.bought) {
+					str += 'Measures radiation';
+					return str;
+				}
+				str += 'The Glowitzer can\'t fire at the following targets until they reach the listed values.';
+				return str;
+			},
+			group: 'lunar',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: '',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // END OF BOOSTS, add new ones immediately before this comment
 }
