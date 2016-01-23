@@ -13922,6 +13922,7 @@ Molpy.Coallate = function(){
 					}
 				} else if (!me.target) {
 					Molpy.BuildGlows();
+					Molpy.CheckCaps();
 					var stuffs = Molpy.stuffs;
 					var counts = 0;
 					str += '<br>Currently loaded with ' + me.chamber + '.';
@@ -14017,17 +14018,17 @@ Molpy.Coallate = function(){
 	
 	Molpy.Aim = function(target) {
 		var glow = Molpy.Boosts['Glowitzer'];
-		if (glow.caps[0][target]) {
+		if (Molpy.GetCap(target) && Molpy.GetCap(target)[1]) {
 			Molpy.Notify('That\'s too irradiated!');
 			Molpy.Boosts['Geiger Counter'].power++;
-			if (Molpy.Boosts['Geiger Counter'].power >= 4) {
+			if (Molpy.Boosts['Geiger Counter'].power >= 6) {
 				Molpy.UnlockBoost('Geiger Counter');
 			}
 			return;
 		}
 		glow.target = target;
 		Molpy.Notify('Aimed the Glowitzer at ' + target + '!');
-		glow.Refresh();
+		Molpy.Boosts['Glowitzer'].Refresh();
 		return;
 	}
 
@@ -14039,39 +14040,85 @@ Molpy.Coallate = function(){
 		}
 		if (glows[glow.target].isstuff) {
 			Molpy.Boosts[glow.target].power = effect()(Molpy.Boosts[glow.target].power);
-			glow.caps[0][glow.target] = effect()(Molpy.Boosts[glow.target].power);
+			var index = Molpy.GetCap(glow.target);
+			if (index) {
+					glow.caps[index[0]][1] = effect()(Molpy.Boosts[glow.target].power);
+			} else {
+				glow.caps.push([glow.target, effect()(Molpy.Boosts[glow.target].power)]);
+			}
 		} else if (glow.target == 'Ninja Stealth') {
 			Molpy.ninjaStealth = effect()(Molpy.ninjaStealth);
-			glow.caps[0][glow.target] = effect()(Molpy.ninjaStealth);
+			var index = Molpy.GetCap(glow.target);
+			if (index) {
+					glow.caps[index[0]][1] = effect()(Molpy.ninjaStealth);
+			} else {
+				glow.caps.push([glow.target, effect()(Molpy.ninjaStealth)]);
+			}
+			
 		} else if (glow.target == 'Ritual Streak') {
 			Molpy.Boosts['Ninja Ritual'].power = Math.max(effect()(Molpy.Boosts['Ninja Ritual'].power), 1e298);
-			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Ninja Ritual'].power);
+			var index = Molpy.GetCap(glow.target);
+			if (index) {
+					glow.caps[index[0]][1] = effect()(Molpy.Boosts['Ninja Ritual'].power);
+			} else {
+				glow.caps.push([glow.target, effect()(Molpy.Boosts['Ninja Ritual'].power)]);
+			}
 		} else if (glow.target == 'the Pope') {
 			Molpy.Boosts['Permanent Staff'].Level = effect()(Molpy.Boosts['Permanent Staff'].Level);
-			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Permanent Staff'].Level);
+			var index = Molpy.GetCap(glow.target);
+			Molpy.Notify(index);
+			if (index) {
+					glow.caps[index[0]][1] = effect()(Molpy.Boosts['Permanent Staff'].Level);
+			} else {
+				glow.caps.push([glow.target, effect()(Molpy.Boosts['Permanent Staff'].Level)]);
+			}
 		} else if (glow.target == 'Shortrifts') {
 			Molpy.Boosts['Safety Net'].power = effect()(Molpy.Boosts['Safety Net'].power);
-			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Safety Net'].power);
+			var index = Molpy.GetCap(glow.target);
+			if (index) {
+					glow.caps[index[0]][1] = effect()(Molpy.Boosts['Safety Net'].power);
+			} else {
+				glow.caps.push([glow.target, effect()(Molpy.Boosts['Safety Net'].power)]);
+			}
 		} else if (glow.target == 'Cryogenics') {
 			Molpy.Boosts['Cryogenics'].power = effect()(Molpy.Boosts['Cryogenics'].power);
-			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Cryogenics'].power);
+			var index = Molpy.GetCap(glow.target);
+			if (index) {
+					glow.caps[index[0]][1] = effect()(Molpy.Boosts['Cryogenics'].power);
+			} else {
+				glow.caps.push([glow.target, effect()(Molpy.Boosts['Cryogenics'].power)]);
+			}
 		} else if (glow.target == 'Vaults') {
 			Molpy.Boosts['Locked Vault'].power = effect()(Molpy.Boosts['Locked Vault'].power);
-			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Locked Vault'].power);
+			var index = Molpy.GetCap(glow.target);
+			if (index) {
+					glow.caps[index[0]][1] = effect()(Molpy.Boosts['Locked Vault'].power);
+			} else {
+				glow.caps.push([glow.target, effect()(Molpy.Boosts['Locked Vault'].power)]);
+			}
 		} else if (glow.target == 'Panther Salve') {
 			Molpy.Boosts['Panther Salve'].power = effect()(Molpy.Boosts['Panther Salve'].power);
-			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Panther Salve'].power);
+			var index = Molpy.GetCap(glow.target);
+			if (index) {
+					glow.caps[index[0]][1] = effect()(Molpy.Boosts['Panther Salve'].power);
+			} else {
+				glow.caps.push([glow.target, effect()(Molpy.Boosts['Panther Salve'].power)]);
+			}
 		} else if (glow.target == 'Lucky Twin') {
 			Molpy.Boosts['Lucky Twin'].power = effect()(Molpy.Boosts['Lucky Twin'].power);
-			glow.caps[0][glow.target] = effect()(Molpy.Boosts['Lucky Twin'].power);
-		}	
-		
+			var index = Molpy.GetCap(glow.target);
+			if (index) {
+					glow.caps[index[0]][1] = effect()(Molpy.Boosts['Lucky Twin'].power);
+			} else {
+				glow.caps.push([glow.target, effect()(Molpy.Boosts['Lucky Twin'].power)]);
+			}
+		}
 		Molpy.Notify('Fired ' + glow.chamber + ' at ' + glow.target + '!');
 		Molpy.GiveTempBoost('Overglare');
 		glow.chamber = '';
 		glow.target = '';
 		glow.power++;
-		glow.Refresh();
+		Molpy.Boosts['Glowitzer'].Refresh();
 		return;
 	}
 
@@ -14103,6 +14150,8 @@ Molpy.Coallate = function(){
 					str += 'Measures radiation';
 					return str;
 				}
+				Molpy.BuildGlows();
+				Molpy.CheckCaps();
 				str += 'The Glowitzer can\'t fire at the following targets until they reach the listed values.';
 				return str;
 			},

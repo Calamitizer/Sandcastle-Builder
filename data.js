@@ -691,10 +691,20 @@ Molpy.BuildGlows = function() {
 	addglowother('Lucky Twin', Molpy.Boosts['Lucky Twin'].power, function() {return Molpy.Boosts['Lucky Twin'].power < 13 * 13});
 }
 
-Molpy.CheckCaps = function() {
-	for (var key in Molpy.Boosts['Glowitzer'].caps[0]) {
-		if (Molpy.glows[key].val >= Molpy.Boosts['Glowitzer'].caps[0][key]) {
-			delete caps[0][key];
+Molpy.GetCap = function(key) {
+	var caps = Molpy.Boosts['Glowitzer'].caps
+	for (var i = 0; i < caps.length; i++) {
+		if (caps[i][0] == key) {
+			return [i, caps[i][1]];
+		}
+	}
+}
+
+Molpy.CheckCaps = function () {
+	var glow = Molpy.Boosts['Glowitzer'];
+	for (var i = 0; i < glow.caps.length; i++) {
+		if (glow.caps[i][1] && Molpy.glows[glow.caps[i][0]].val >= glow.caps[i][1]) {
+			glow.caps[i][1] = 0;
 		}
 	}
 }
