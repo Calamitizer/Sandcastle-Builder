@@ -649,7 +649,6 @@ Molpy.stuffs = [
 	'Starstuff',
 ];
 
-
 Molpy.glows = {};
 
 Molpy.BuildGlows = function() {
@@ -707,6 +706,18 @@ Molpy.CheckCaps = function () {
 			glow.caps[i][1] = 0;
 		}
 	}
+}
+
+Molpy.SortCaps = function() {
+	var newcaps = [];
+	var glows = Object.keys(Molpy.glows);
+	for (var i = 0; i < glows.length; i++) {
+		var index = Molpy.GetCap(glows[i]);
+		if (index) {
+			newcaps.push(Molpy.Boosts['Glowitzer'].caps[index[0]]);
+		}
+	}
+	Molpy.Boosts['Glowitzer'].caps = newcaps;
 }
 
 // Molpy.glows = Molpy.stuffs.concat([
@@ -1095,6 +1106,31 @@ Molpy.CheckLogicatRewards = function(automationLevel) {
 	Molpy.Boosts['DimenKey'].logic = Molpy.Got('Aperture Science') * Math.pow(10, Molpy.Boosts['Aperture Science'].power);
 	//Dragon Drum and Sea Mining are purposely not on this list; they're only intended as Redundakitty rewards
 }
+
+Molpy.BuildSpireRewards = function() {
+	Molpy.Boosts['Glowitzer'].spire = 5;
+	Molpy.Boosts['Geiger Counter'].spire = [10, function() {return Molpy.Boosts['Geiger Counter'].power >= 6}];
+	Molpy.Boosts['Teleperiscope'].spire = [15];
+	Molpy.Boosts['Drone Manufactory'].spire = [20];
+	Molpy.Boosts['EVA Airlocks'].spire = [35];
+	Molpy.Boosts['Grapple Mortar'].spire = [50];
+	Molpy.Boosts['DRB'].spire = [75]; // Drone Retrieval Belt
+	Molpy.Boosts['fAI'].spire = [100]; // navcode off
+	Molpy.Boosts['Stellar Refinery'].spire = [125]; // make uS
+	Molpy.Boosts['ADB'].spire = [150];
+	Molpy.Boosts['DPCJ'].spire = [200]; // Dual Piezo Coolant Jets
+	Molpy.Boosts['Starfeed'].spire = [250];
+	Molpy.Boosts['S&C Missle Array'].spire = [300]; // clicks cats, upgrade every 20 floors
+	Molpy.Boosts['Nippy'].spire = [420];
+	Molpy.Boosts['GravChamber'].spire = [500]; // make AQ // Gravitometric Confinement Chamber
+	Molpy.Boosts['Enter the Void'].spire = [750];
+	Molpy.Boosts['Lunar Throne'].spire = [850];
+	Molpy.Boosts['Retroaccelerator'].spire = [1000]; // make tach
+	Molpy.Boosts['FTL Conduction'].spire = [1500];
+	Molpy.Boosts['Ansible'].spire = [2000];
+	Molpy.Boosts['Moonbase'].spire = [5000];
+}
+
 Molpy.mapMonumg = 200;
 
 Molpy.CheckASHF = function() {

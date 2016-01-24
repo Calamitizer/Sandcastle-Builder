@@ -3431,7 +3431,10 @@ Molpy.DefineBoosts = function() {
 		while(i--) {
 			if(Molpy.Got('Glass Ceiling ' + i)) c++;
 		}
-		if(c >= 10) Molpy.EarnBadge('Ceiling Broken');
+		if(c >= 10) {
+			Molpy.EarnBadge('Ceiling Broken');
+			// Molpy.UnlockBoost('Moondrizzle');
+		}
 		if(c >= 12) Molpy.EarnBadge('Ceiling Disintegrated');
 		return c;
 	}
@@ -12418,6 +12421,7 @@ Molpy.Coallate = function(){
 	});
 	new Molpy.Boost({
 		name: 'Dimension Shards',
+		single: 'Dimension Shard',
 		plural: 'Dimension Shards',
 		alias: 'Shards',
 		icon: 'shard',
@@ -12512,6 +12516,7 @@ Molpy.Coallate = function(){
 	};
 	new Molpy.Boost({
 		name: 'Dimension Panes',
+		single: 'Dimension Pane',
 		plural: 'Dimension Panes',
 		alias: 'Panes',
 		icon: 'pane',
@@ -12698,7 +12703,7 @@ Molpy.Coallate = function(){
 				str += '<br>You will have available space for another dimension of folding at ' + Molpify(threshold) + ' empty vaults.';
 			}
 			str += '<br>Currently, you have a' + (((''+dim)[0] == 8) || (dim == 11) || (dim == 18) ? 'n' : '') + ' ' + dim + '-dimensional Logicat cage, holding ';
-			str += ((Math.pow(2,(dim-4)))*(dim)*(dim-1)*(dim-2))/3 + ' times the Logicats.';
+			str += Molpify(((Math.pow(2,(dim-4)))*(dim)*(dim-1)*(dim-2))/3) + ' times the Logicats.';
 			return str;
 		},
 		stats: '<i>Where the cage stands the universe folds.</i>',
@@ -13784,6 +13789,7 @@ Molpy.Coallate = function(){
 					return str;
 				}
 			},
+			className: 'action',
 			icon: 'spire',
 			desc: function(me) {
 				var str = '';
@@ -13824,16 +13830,17 @@ Molpy.Coallate = function(){
 
 	new Molpy.Boost({
 			name: 'Spire Work Order',
+			className: 'action',
 			icon: 'workorder',
 			desc: function(me) {
 				var riser = Molpy.Boosts['Moon Spire'];
 				var str = '';
 				if (!me.bought) {
-					str += 'Allows you to begin construction of ' + (riser.Level ? 'another floor of' : 'the') + ' Moon Spire.';
+					str += 'Allows you to begin construction of ' + (riser.Level ? 'another floor of' : '') + ' the Moon Spire.';
 					return str;
 				}
 				str += '<input type="Button" value="Start" onclick="Molpy.Rise()"></input> construction of ' + (riser.Level ? 'floor ' + Molpify(riser.Level + 1): 'the spire') + '!';
-				str += '<br>This will require ' + Molpify(riser.reqtime()) + ' mNP at ' + (riser.Level ? 'floor ' + riser.Level : 'NP ' + Molpy.newpixNumber) + (riser.md ? ', and ' + Molpify(riser.mdcost()) + ' Moondust/mNP' : '') + '. (Construction is not aborted if you run out.)';
+				str += '<br>This will require ' + Molpify(riser.reqtime()) + ' mNP at ' + (riser.Level ? 'floor ' + riser.Level : 'NP ' + Molpy.newpixNumber) + (riser.md ? ', and ' + Molpify(riser.mdcost()) + ' Moondust/mNP' : '') + '. (Construction is not aborted if you run out or leave.)';
 				if (!riser.location) {
 					str += '<br><b>Caution:</b> Clicking that button will <small>(semi-)</small>permanently fix the spire on your current location. Build somewhere smart!'; 
 				}
@@ -13883,6 +13890,8 @@ Molpy.Coallate = function(){
 		
 		lockFunction: function() {
 			Molpy.Boosts['Moon Spire'].Level++;
+			Molpy.Notify('Construction of floor ' + Molpy.Boosts['Moon Spire'].Level + ' has completed!');
+			Molpy.RewardSpire();
 		},
 		countdowncheck: function() {
 			var riser = Molpy.Boosts['Moon Spire']
@@ -13926,21 +13935,21 @@ Molpy.Coallate = function(){
 					var stuffs = Molpy.stuffs;
 					var counts = 0;
 					str += '<br>Currently loaded with ' + me.chamber + '.';
-					str += '<br><b>Aim</b> the Glowitzer at';
+					str += '<br><b>Aim</b> the Glowitzer at<br>';
 					if (me.chamber == 'Moondust') {
 						for (key in Molpy.glows) {
 							if (Molpy.glows[key].mdcheck()) {
 								counts++;
-								str += '<br><center><input type="Button" value="' + me.formatName(key);
-								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
+								str += '<center><small><input type="Button" value="' + me.formatName(key);
+								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></small></center>';
 							}
 						}
 					}
-					if (me.chamber == 'Starstuff') {
+					if (me.chamber == 'Starstuff' || me.chamber == 'uSols') {
 						for (key in Molpy.glows) {
 							if (Molpy.glows[key].sscheck()) {
 								counts++;
-								str += '<br><center><input type="Button" value="' + me.formatName(key);
+								str += '<center><input type="Button" value="' + me.formatName(key);
 								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
 							}
 						}
@@ -13949,7 +13958,7 @@ Molpy.Coallate = function(){
 						for (key in Molpy.glows) {
 							if (Molpy.glows[key].aqcheck()) {
 								counts++;
-								str += '<br><center><input type="Button" value="' + me.formatName(key);
+								str += '<center><input type="Button" value="' + me.formatName(key);
 								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
 							}
 						}
@@ -13958,7 +13967,7 @@ Molpy.Coallate = function(){
 						for (key in Molpy.glows) {
 							if (Molpy.glows[key].tccheck()) {
 								counts++;
-								str += '<br><center><input type="Button" value="' + me.formatName(key);
+								str += '<center><input type="Button" value="' + me.formatName(key);
 								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
 							}
 						}
@@ -13987,7 +13996,7 @@ Molpy.Coallate = function(){
 			},
 			chamber: '',
 			target: '',
-			caps: [{}],
+			caps: [],
 			formatName: function(stuff) {
 				if (stuff == 'Logicat') return 'the Logicat';
 				if (stuff == 'Vacuum') return 'Vacuums';
@@ -14001,7 +14010,7 @@ Molpy.Coallate = function(){
 			saveData: {
 				4: ['chamber', '', 'string'],
 				5: ['target', '', 'string'],
-				6: ['caps', [{}], 'array'],
+				6: ['caps', 0, 'array'],
 		}
 	});
 	
@@ -14021,14 +14030,11 @@ Molpy.Coallate = function(){
 		if (Molpy.GetCap(target) && Molpy.GetCap(target)[1]) {
 			Molpy.Notify('That\'s too irradiated!');
 			Molpy.Boosts['Geiger Counter'].power++;
-			if (Molpy.Boosts['Geiger Counter'].power >= 6) {
-				Molpy.UnlockBoost('Geiger Counter');
-			}
 			return;
 		}
 		glow.target = target;
 		Molpy.Notify('Aimed the Glowitzer at ' + target + '!');
-		Molpy.Boosts['Glowitzer'].Refresh();
+		glow.Refresh();
 		return;
 	}
 
@@ -14118,7 +14124,7 @@ Molpy.Coallate = function(){
 		glow.chamber = '';
 		glow.target = '';
 		glow.power++;
-		Molpy.Boosts['Glowitzer'].Refresh();
+		glow.Refresh();
 		return;
 	}
 
@@ -14134,9 +14140,15 @@ Molpy.Coallate = function(){
 				return str;
 			},
 			group: 'lunar',
-			startCountdown: function() {
-				return 3;
-				// make dynamic
+			cds: {
+				Moondust: 3000,
+				Starstuff: 6000,
+				uSols: 12000,
+				Antiquanta: 5,
+				Tachyons: 3000,
+			},
+			startCountdown: function(me) {
+				return Molpy.Boosts['Overglare'].cds[Molpy.Boosts['Glowitzer'].chamber] * (Molpy.Got('DPCJ') ? 0.8 : 1);
 			}
 		}
 	);
@@ -14144,18 +14156,413 @@ Molpy.Coallate = function(){
 	new Molpy.Boost({
 			name: 'Geiger Counter',
 			icon: 'geigercounter',
+			className: 'alert',
 			desc: function(me) {
 				var str = '';
 				if (!me.bought) {
-					str += 'Measures radiation';
+					str += 'Tracks excess radiation from the Glowitzer';
 					return str;
 				}
+				var caps = Molpy.Boosts['Glowitzer'].caps;
+				var found = 0
 				Molpy.BuildGlows();
 				Molpy.CheckCaps();
-				str += 'The Glowitzer can\'t fire at the following targets until they reach the listed values.';
+				for (var i = 0; i < caps.length; i++) {
+					if (caps[i][1]) {
+						found = 1;
+					}
+				}
+				if (found) {
+					Molpy.SortCaps();
+					str += 'The Glowitzer can\'t fire at the following targets until they reach the listed values.';
+					for (var i = 0; i < caps.length; i++) {
+						if (caps[i][1]) {
+							str += '<br><b>' + caps[i][0] + '</b>: ' + Molpify(caps[i][1]);
+						}
+					}
+				} else {
+					str += 'No rads in sight!';
+				}
 				return str;
 			},
 			group: 'lunar',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+		name: 'uSols',
+		title: 'μSols',
+		single: 'μSols',
+		plural: 'μSols',
+		icon: 'usols',
+		group: 'stuff',
+		desc: function(me) {
+			var str = ''
+			str += 'Miniscule nuclear furnaces.'
+			str += ' You have ' + Molpify(me.Level, 3) + ' μSol' + plural(me.Level) + '.';
+			return str;
+		},
+		defStuff: 1
+	});
+	
+	new Molpy.Boost({
+		name: 'Antiquanta',
+		single: 'Antiquantum',
+		plural: 'Antiquanta',
+		icon: 'antiquanta',
+		group: 'stuff',
+		desc: function(me) {
+			var str = ''
+			str += 'No touching!'
+			str += ' You have ' + Molpify(me.Level, 3) + ' ' + (me.Level == 1 ? me.single : me.plural) + '.';
+			return str;
+		},
+		defStuff: 1
+	});
+
+	new Molpy.Boost({
+		name: 'Tachyons',
+		single: 'Tachyon',
+		plural: 'Tachyons',
+		icon: 'tachyons',
+		group: 'stuff',
+		desc: function(me) {
+			var str = ''
+			str += 'Complex-mass particles incapable of subluminal speed.'
+			str += ' You have ' + Molpify(me.Level, 3) + ' Tachyon' + plural(me.Level) + '.';
+			return str;
+		},
+		defStuff: 1
+	});
+
+	new Molpy.Boost({
+			name: 'Teleperiscope',
+			icon: 'teleperiscope',
+			desc: function(me) {
+				var str = '';
+				if (!me.bought) {
+					str += 'Lets you peek at what floor the next Spire boost will unlock on';
+					return str;
+				}
+				
+				if (!false) { // if not at top floor of Spire
+					str += '<input type="Button" value="Scan" onclick="Molpy.Peep()"></input>';
+					str += ' the stars!';
+				}
+				return str;
+			},
+			group: 'lunar',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	Molpy.Peep = function() {
+		var peeps = [];
+		Molpy.BuildSpireRewards();
+		for (var i = 0; i < Molpy.BoostsById.length; i++) {
+			var boost = Molpy.BoostsById[i];
+			if (boost.spire && !boost.unlocked) {
+				peeps.push(boost);
+			}
+		}
+		if (!peeps.length) {
+			Molpy.Notify('Nihil supernum');
+		}
+		peeps.sort(function(a,b) {return a.spire[0] - b.spire[0]});
+		Molpy.Notify('Reaching floor ' + peeps[0].spire[0] + ' will unlock ' + peeps[0].name);
+		if (peeps[0].spire[1] && !peeps[0].spire[1]()) {
+			Molpy.Notify('...but there\'s something else you must do first.');
+		}
+	}
+	
+	new Molpy.Boost({
+			name: 'Drone Manufactory',
+			icon: 'droneman',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: 'lunar',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'EVA Airlocks',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Titan Treads',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Grapple Mortar',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Drone Retrieval Belt',
+			alias: 'DRB',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'fAI',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Stellar Refinery',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Automated Deployment Bay',
+			alias: 'ADB',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Dual Piezo Cooling Jets',
+			alias: 'DPCJ',
+			icon: 'dpcj',
+			desc: function(me) {
+				var str = '';
+				str += 'Cools the Glowitzer and lowers Overglare\'s refresh time';
+				return str;
+			},
+			group: 'lunar',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Starfeed',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'S&C Missle Array',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Nippy',
+			icon: 'nippy',
+			desc: function(me) {
+				var str = '';
+				str += 'Redacted clicking sometimes reduces the Overglare cooldown';
+				return str;
+			},
+			group: 'lunar',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Gravitometric Confinement Chamber',
+			alias: 'GravChamber',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Enter the Void',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Lunar Throne',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Retroaccelerator',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'FTL Conduction',
+			icon: 'ftlc',
+			desc: function(me) {
+				var str = '';
+				str += 'Quarters the Overglare cooldown at the cost of a tachyon';
+				return str;
+			},
+			group: 'lunar',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Ansible',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+
+	new Molpy.Boost({
+			name: 'Moonbase',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
 			price: {
 				Sand: 1,
 			},
@@ -14176,17 +14583,6 @@ Molpy.Coallate = function(){
 			},
 		}
 	);
-
-
-
-
-
-
-
-
-
-
-
 
 
 

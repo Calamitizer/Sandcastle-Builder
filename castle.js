@@ -2981,6 +2981,24 @@ Molpy.Up = function() {
 			dq.drumbeats++;
 		};
 
+		Molpy.RewardSpire = function() {
+			var availrewards = [];
+			var riser = Molpy.Boosts['Moon Spire'];
+			for (var i = 0; i < Molpy.BoostsById.length; i++) {
+				var boost = Molpy.BoostsById[i];
+				if (boost.spire && boost.spire[0] <= riser.Level && !boost.unlocked) {
+					Molpy.Notify(boost.name);
+					availrewards.push(boost);
+				}
+			}
+			if (availrewards.length) {
+				var choice = GLRschoice(availrewards);
+				Molpy.Notify('Inspiration strikes, and an invention blossoms into your mind');
+				Molpy.UnlockBoost(choice.alias, 1);
+				return;
+			} // else reward stuff maybe
+		};
+
 		Molpy.CalcPriceFactor = function() {
 			var baseval = 1;
 			if(Molpy.Got('ASHF')) {
@@ -3005,6 +3023,7 @@ Molpy.Up = function() {
 		Molpy.UpdateColourScheme();
 
 		Molpy.BuildRewardsLists();
+		Molpy.BuildSpireRewards();
 		Molpy.CheckLogicatRewards();
 		Molpy.CheckDoRDRewards();
 		Molpy.CheckKittenRewards()
