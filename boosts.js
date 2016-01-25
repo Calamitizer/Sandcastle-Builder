@@ -14015,6 +14015,7 @@ Molpy.Coallate = function(){
 	});
 	
 	Molpy.Ready = function(ammo) {
+		Molpy.Anything = 1;
 		if (Molpy.Spend(ammo, 1)) {
 			Molpy.Boosts['Glowitzer'].chamber = ammo;
 			Molpy.Notify('Loaded the Glowitzer with ' + ammo + '!');
@@ -14026,6 +14027,7 @@ Molpy.Coallate = function(){
 	}
 	
 	Molpy.Aim = function(target) {
+		Molpy.Anything = 1;
 		var glow = Molpy.Boosts['Glowitzer'];
 		if (Molpy.GetCap(target) && Molpy.GetCap(target)[1]) {
 			Molpy.Notify('That\'s too irradiated!');
@@ -14039,6 +14041,7 @@ Molpy.Coallate = function(){
 	}
 
 	Molpy.Fire = function() {
+		Molpy.Anything = 1;
 		var glow = Molpy.Boosts['Glowitzer'];
 		var glows = Molpy.glows;
 		var effect = function() {
@@ -14262,6 +14265,7 @@ Molpy.Coallate = function(){
 	);
 
 	Molpy.Peep = function() {
+		Molpy.Anything = 1;
 		var peeps = [];
 		Molpy.BuildSpireRewards();
 		for (var i = 0; i < Molpy.BoostsById.length; i++) {
@@ -14281,11 +14285,29 @@ Molpy.Coallate = function(){
 	}
 	
 	new Molpy.Boost({
-			name: 'Drone Manufactory',
-			icon: 'droneman',
+			name: 'Robodjinn Manufactory',
+			alias: 'RDM',
+			icon: 'roboman',
 			desc: function(me) {
 				var str = '';
-				str += '';
+				str += 'Imbues spare parts with animated spirits.';
+				if (me.bought) {
+					str += ' You can create one robodjinn for each unique stuff you possess, up to a limit of 1 per 10 Moon Spire floors.';
+					str += ' You currently have ' + me.power + ' robodjinn.';
+					
+					if (me.power >= Math.floor(Molpy.Boosts['Moon Spire'].Level/10)) {
+						str += ' You can\'t make any more.';
+						//return str;
+					}
+					str += ' Create a djinn with the spirit of: ';
+					for (var i = 0; i < Molpy.stuffs.length; i++) {
+						var stuff = Molpy.Boosts[Molpy.stuffs[i]];
+						if (Molpy.Got(stuff.alias) && stuff.Level >= 1 && ((me.bought & (1<<(i+1))) == 0)) {
+							// str += '<br><br>Create a' + (['exp','Otherness','Antiquanta'].indexOf(Molpy.stuffs[i]) > -1 ? 'n' : '') + ' ';
+							str += '<center><input class=smallbutton type="Button" onclick="Molpy.Animate('+i+')" value="'+stuff.plural+'" ></input></center>';
+						}
+					}				
+				}
 				return str;
 			},
 			group: 'lunar',
@@ -14294,6 +14316,37 @@ Molpy.Coallate = function(){
 			},
 		}
 	);
+
+	Molpy.Animate = function(index) {
+		Molpy.Anything = 1;
+		var stuff = Molpy.Boosts[Molpy.stuffs[index]];
+		var me = Molpy.Boosts['RDM'];
+		if ((me.bought & (1<<(index+1))) == 0) {
+			if (Molpy.Spend(stuff.alias, 1)) {
+				me.bought |= (1<<(index+1));
+				me.power += 1;
+				me.Refresh();
+				var str = 'You created a' + (['exp','Otherness','Antiquanta'].indexOf(Molpy.stuffs[index]) > -1 ? 'n' : '') + ' ';
+				str += stuff.single + ' robodjinn!';
+				Molpy.Notify(str);
+			} else {
+				Molpy.Notify('You don\'t have even a single ' + stuff.single + '...');
+			}
+		}
+		me.Refresh();
+		return;
+	}
+	
+	Molpy.Summon = function() {
+		var rdm = Molpy.Boosts['RDM'];
+		var djinn = [];
+		for (var i = 0; i < Molpy.stuffs.length; i++) {
+			if (rdm.bought & (1<<(i+1))) {
+				djinn.push(Molpy.stuffs[i]);
+			}
+		}
+		return djinn;
+	}
 
 	new Molpy.Boost({
 			name: 'EVA Airlocks',
@@ -14339,10 +14392,25 @@ Molpy.Coallate = function(){
 			},
 		}
 	);
+	
+	new Molpy.Boost({
+			name: 'Robotemple',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
 
 	new Molpy.Boost({
-			name: 'Drone Retrieval Belt',
-			alias: 'DRB',
+			name: 'Robodjinn Retrieval Belt',
+			alias: 'RRB',
 			icon: '',
 			desc: function(me) {
 				var str = '';

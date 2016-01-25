@@ -647,7 +647,11 @@ Molpy.stuffs = [
 	'Grayness',
 	'Moondust',
 	'Starstuff',
+	'uSols',
+	'Antiquanta',
+	'Tachyons',
 ];
+// please add only to the end of this list, or you will break robodjinn
 
 Molpy.glows = {};
 
@@ -1108,13 +1112,14 @@ Molpy.CheckLogicatRewards = function(automationLevel) {
 }
 
 Molpy.BuildSpireRewards = function() {
-	Molpy.Boosts['Glowitzer'].spire = 5;
+	Molpy.Boosts['Glowitzer'].spire = [5];
 	Molpy.Boosts['Geiger Counter'].spire = [10, function() {return Molpy.Boosts['Geiger Counter'].power >= 6}];
 	Molpy.Boosts['Teleperiscope'].spire = [15];
-	Molpy.Boosts['Drone Manufactory'].spire = [20];
+	Molpy.Boosts['RDM'].spire = [20, function() {return Molpy.CastleTools['NewPixBot'].price == Infinity || isNaN(Molpy.CastleTools['NewPixBot'].price)}];
 	Molpy.Boosts['EVA Airlocks'].spire = [35];
+	Molpy.Boosts['Titan Treads'].spire = [42];
 	Molpy.Boosts['Grapple Mortar'].spire = [50];
-	Molpy.Boosts['DRB'].spire = [75]; // Drone Retrieval Belt
+	Molpy.Boosts['RRB'].spire = [75]; // Robodjinn Retrieval Belt
 	Molpy.Boosts['fAI'].spire = [100]; // navcode off
 	Molpy.Boosts['Stellar Refinery'].spire = [125]; // make uS
 	Molpy.Boosts['ADB'].spire = [150];
