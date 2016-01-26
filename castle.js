@@ -57,6 +57,7 @@ Molpy.Up = function() {
 
 		Molpy.time = moment();
 		Molpy.newpixNumber = 1; //to track which background to load, and other effects...
+		Molpy.NPImPart = 0;
 		Molpy.ONGstart = ONGsnip(moment()); //contains the time of the previous ONG
 		Molpy.NPlength = 1800; //seconds in current NewPix 
 		Molpy.mNPlength = 1800; //milliseconds in milliNewPix
@@ -3293,7 +3294,7 @@ Molpy.Up = function() {
 			        if ((me.countdownCMS || !Molpy.Boosts['Coma Molpy Style'].IsEnabled)) {
 						if (me.countdowncheck) {
 							if (me.countdowncheck()) {
-								me.countdown--;
+								me.countdown -= me.countdowncheck();
 							}
 						} else {
 							me.countdown--;
@@ -3846,7 +3847,7 @@ Molpy.Up = function() {
 		if(Molpy.Boosts['Controlled Hysteresis'].power>-1){Molpy.newpixNumber=Molpy.Boosts['Controlled Hysteresis'].power;Molpy.currentStory=Molpy.fracParts.indexOf(Number(Molpy.Boosts['Controlled Hysteresis'].power.toFixed(3)))}
 	};
 	Molpy.ONGs[0] = function(){
-		if (!Molpy.IsEnabled('Temporal Anchor') && Molpy.newpixNumber != 0) {
+		if (!Molpy.IsEnabled('Temporal Anchor') && Molpy.newpixNumber != 0 && Molpy.NPImPart != 0) {
 			if (Molpy.Got('Signpost') && Molpy.Boosts['Signpost'].power == 1) {
 				Molpy.newpixNumber = 0; Molpy.currentStory=-1;
 			} else {

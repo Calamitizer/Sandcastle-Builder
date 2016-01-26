@@ -26,6 +26,7 @@ Molpy.DefineBoosts = function() {
 		magic: ['magic', 'Magic'],
 		dimen: ['dimension tech', 'Dimension Tech'],
 		lunar: ['lunacy', 'Lunacy'],
+		djinn: ['djinn', 'Djinn'],
 		varie: ['variegation', 'Variegation', 'varie'],
 	};
 	
@@ -735,6 +736,10 @@ Molpy.DefineBoosts = function() {
 		chips = chips ? (chips == 1?Molpy.CalcJumpEnergy(np):Infinity) : 0;
 		var price = Molpy.TimeTravelPrice();
 		if(chips) price = 0;
+		if (Molpy.NPImPart) {
+			Molpy.Notify('Time Travel is strictly prohibited in the Moon Spire!')
+			return;
+		}
 		if(np < 1 && !Molpy.Earned('Minus Worlds') && !Molpy.Earned('Absolute Zero')) {
 			Molpy.Notify('Heretic!',1);
 			Molpy.Notify('There is nothing before time.',1);
@@ -13764,94 +13769,153 @@ Molpy.Coallate = function(){
 	});
 
 	new Molpy.Boost({
-			name: 'Moondrizzle',
-			icon: 'moondrizzle',
-			desc: 'You\'re collecting a trickle of Moondust.',
-			group: 'lunar',
-			unlockFunction: function() {
-				this.buy();
-			},
-		}
-	);
+		name: 'Moondrizzle',
+		icon: 'moondrizzle',
+		desc: 'You\'re collecting a trickle of Moondust.',
+		group: 'lunar',
+		unlockFunction: function() {
+			this.buy();
+		},
+	});
 
 	new Molpy.Boost({
-			name: 'Moon Spire',
-			title: function(me) {
-				var str = 'Moon Spire';
-				if (me.Level) {
-					return str;
-				}
-				if (me.location) {
-					str += ' Base';
-					return str;
-				} else {
-					str += ' Plans';
-					return str;
-				}
-			},
-			className: 'action',
-			icon: 'spire',
-			desc: function(me) {
-				var str = '';
-				str += 'An ambitious edifice for celestial exploration.';
-				if (me.location) {
-					str += '<br>Your Moon Spire is located at NP ' + me.location + '.';
-				}
-				if (me.Level) {
-					str += '<br>It has ' + me.Level + ' floor' + plural(me.Level) + '.';
-				}
-				if (!me.Level && !Molpy.Got('Spire Construction')) {
-					str += '<br>Decide where to put the spire, then start construction!';
-				}
+		name: 'Moon Spire',
+		title: function(me) {
+			var str = 'Moon Spire';
+			if (me.Level) {
 				return str;
-			},
-			group: 'lunar',
-			buyFunction: function() {
-				Molpy.UnlockBoost('Spire Work Order');
-			},
-			price: {
-				Moondust: 5 * 10000,
-				Blackprints: 5 * 1000,
-			},
-			Level: 0,
-			location: undefined,
-			reqtime: function() {
-				return 1000 + 100 * this.Level;
-			},
-			mdcost: function() {
-				return 1 + Math.floor(this.Level / 10);
-			},
-			defSave: 1,
-			saveData: {4: ['Level', 0,'int'],
-			           5: ['location', undefined, 'int'],
 			}
+			if (me.location) {
+				str += ' Base';
+				return str;
+			} else {
+				str += ' Plans';
+				return str;
+			}
+		},
+		className: 'action',
+		icon: 'spire',
+		desc: function(me) {
+			var str = '';
+			str += 'An ambitious edifice for celestial exploration.';
+			if (!me.Level && !Molpy.Got('Spire Construction')) {
+				str += '<br>Decide where to put the spire, then start construction!';
+				return str;
+			}
+			if (me.location) {
+				str += '<br>Your Moon Spire is located at NP ' + me.location + '.';
+			}
+			if (me.Level) {
+				str += '<br>It has ' + me.Level + ' floor' + plural(me.Level) + '.';
+			}
+			if (!Molpy.NPImPart && Molpy.newpixNumber == me.location) {
+				str += '<br><input type="Button" value="Enter" onclick="Molpy.Enter()"></input> the Moon Spire!';
+			}
+			if (Molpy.NPImPart) {
+				str += '<br>You are currently on floor <b>' + Molpy.NPImPart + '</b>.';
+				var tens = (me.Level >= 100);
+				var hundreds = (me.Level >= 1000);
+				if (hundreds && (Molpy.NPImPart <= me.Level-100)) {
+					str += '<br><input type="Button" value="Ascend (100)" onclick="Molpy.Traverse(100)"></input>';
+				}
+				if (tens && (Molpy.NPImPart <= me.Level-10)) {
+					str += '<br><input type="Button" value="Ascend (10)" onclick="Molpy.Traverse(10)"></input>';
+				}
+				if (Molpy.NPImPart < me.Level) {
+					str += '<br><input type="Button" value="Ascend' + (tens ? ' (1)' : '') + '" onclick="Molpy.Traverse(1)"></input>';
+				}
+				if (Molpy.NPImPart > 1) {
+					str += '<br><input type="Button" value="Descend' + (tens ? ' (1)' : '') + '" onclick="Molpy.Traverse(-1)"></input>';
+				}
+				if (tens && (Molpy.NPImPart >= 10)) {
+					str += '<br><input type="Button" value="Descend (10)" onclick="Molpy.Traverse(-10)"></input>';
+				}
+				if (hundreds && (Molpy.NPImPart >= 100)) {
+					str += '<br><input type="Button" value="Descend (100)" onclick="Molpy.Traverse(-100)"></input>';
+				}				
+				if (Molpy.NPImPart == 1) {
+					str += '<br><input type="Button" value="Leave" onclick="Molpy.Exit()"></input> the Moon Spire!';
+				}
+			}
+			return str;
+		},
+		group: 'lunar',
+		buyFunction: function() {
+			Molpy.UnlockBoost('Spire Work Order');
+		},
+		price: {
+			Moondust: 5 * 10000,
+			Blackprints: 5 * 1000,
+		},
+		Level: 0,
+		location: undefined,
+		reqtime: function() {
+			return 1000 + 100 * this.Level;
+		},
+		mdcost: function() {
+			return 1 + Math.floor(this.Level / 10);
+		},
+		defSave: 1,
+		saveData: {4: ['Level', 0,'int'],
+		           5: ['location', undefined, 'int'],
 		}
-	);
+	});
+
+	Molpy.Enter = function() {
+		Molpy.Anything = 1;
+		Molpy.NPImPart = 1;
+		var al = Molpy.Boosts['EVA Airlocks'];
+		if (al.power) {
+			Molpy.Add('Starstuff', al.power);
+			Molpy.Notify('Collected ' + al.power + ' starstuff from EVAs!', 1);
+			al.power = 0;
+		}
+		Molpy.Boosts['Moon Spire'].Refresh()
+		return;
+	}
+
+	Molpy.Traverse = function(n) {
+		Molpy.Anything = 1;
+		var pos = Molpy.NPImPart;
+		if ((pos + n <= 0) || (pos + n > Molpy.Boosts['Moon Spire'].Level)) {
+			Molpy.Notify('Out of bounds!');
+			return;
+		}
+		Molpy.NPImPart += n;
+		Molpy.Boosts['Moon Spire'].Refresh()
+		return;
+	}
+
+	Molpy.Exit = function() {
+		Molpy.Anything = 1;
+		Molpy.NPImPart = 0;
+		Molpy.Boosts['Moon Spire'].Refresh()
+		return;
+	}
 
 	new Molpy.Boost({
-			name: 'Spire Work Order',
-			className: 'action',
-			icon: 'workorder',
-			desc: function(me) {
-				var riser = Molpy.Boosts['Moon Spire'];
-				var str = '';
-				if (!me.bought) {
-					str += 'Allows you to begin construction of ' + (riser.Level ? 'another floor of' : '') + ' the Moon Spire.';
-					return str;
-				}
-				str += '<input type="Button" value="Start" onclick="Molpy.Rise()"></input> construction of ' + (riser.Level ? 'floor ' + Molpify(riser.Level + 1): 'the spire') + '!';
-				str += '<br>This will require ' + Molpify(riser.reqtime()) + ' mNP at ' + (riser.Level ? 'floor ' + riser.Level : 'NP ' + Molpy.newpixNumber) + (riser.md ? ', and ' + Molpify(riser.mdcost()) + ' Moondust/mNP' : '') + '. (Construction is not aborted if you run out or leave.)';
-				if (!riser.location) {
-					str += '<br><b>Caution:</b> Clicking that button will <small>(semi-)</small>permanently fix the spire on your current location. Build somewhere smart!'; 
-				}
+		name: 'Spire Work Order',
+		className: 'action',
+		icon: 'workorder',
+		desc: function(me) {
+			var riser = Molpy.Boosts['Moon Spire'];
+			var str = '';
+			if (!me.bought) {
+				str += 'Allows you to begin construction of ' + (riser.Level ? 'another floor of' : '') + ' the Moon Spire.';
 				return str;
-			},
-			group: 'lunar',
-			priceFunction: function() {
-				return {Blackprints: 5 * Molpy.Boosts['Moon Spire'].Level * 100 };
-			},
-		}
-	);
+			}
+			str += '<input type="Button" value="Start" onclick="Molpy.Rise()"></input> construction of ' + (riser.Level ? 'floor ' + Molpify(riser.Level + 1): 'the spire') + '!';
+			str += '<br>This will require ' + Molpify(riser.reqtime()) + ' mNP at ' + (riser.Level ? 'floor ' + riser.Level : 'NP ' + Molpy.newpixNumber) + (riser.md ? ', and ' + Molpify(riser.mdcost()) + ' Moondust/mNP' : '') + '. (Construction is not aborted if you run out or leave.)';
+			if (!riser.location) {
+				str += '<br><b>Caution:</b> Clicking that button will <small>(semi-)</small>permanently fix the spire on your current location. Build somewhere smart!'; 
+			}
+			return str;
+		},
+		group: 'lunar',
+		priceFunction: function() {
+			return {Blackprints: 5 * Molpy.Boosts['Moon Spire'].Level * 100 };
+		},
+	});
 
 	Molpy.Rise = function() {
 		var riser = Molpy.Boosts['Moon Spire'];
@@ -13895,122 +13959,130 @@ Molpy.Coallate = function(){
 		},
 		countdowncheck: function() {
 			var riser = Molpy.Boosts['Moon Spire']
-			return (Molpy.newpixNumber == (riser.Level ? riser.Level : riser.location) && Molpy.Spend('Moondust', riser.mdcost()));
+			var player = 0 + (riser.Level ? Molpy.NPImPart == riser.Level : Molpy.newpixNumber == riser.location);
+			var spare = Molpy.Spare();
+			var count = 0;
+			for (var i = 0; i < player + spare; i++) {
+				if (Molpy.Spend('Moondust', riser.mdcost())) {
+					count++;
+				}
+			}
+			return count;
 		},
 	});
 
 	new Molpy.Boost({
-			name: 'Glowitzer',
-			icon: 'glowitzer',
-			className: 'action',
-			desc: function(me) {
-				var str = '';
-				if (!me.bought) {
-					str += 'Fires stuff at things for reasons.';
-					return str;
-				}
-				str += 'Load it with various celestial bits and fire it at something for certain effects. Experiment!';
-				if (Molpy.Got('Overglare')) {
-					str += '<br>The Glowitzer is currently cooling. It will be ready to fire in ';
-					str += Molpify(Molpy.Boosts['Overglare'].countdown) + ' mNP.';
-					return str;
-				}	
-				if (!me.chamber) {
-					var counts = 0;
-					var ammo = me.ammo
-					str += '<br><b>Load</b> the Glowitzer with';
-					for (i = 0; i < ammo.length; i++) {
-						if (Molpy.Got(ammo[i]) && Molpy.Boosts[ammo[i]].power) {
-							counts++;
-							str += '<br><input type="Button" value="' + ammo[i] + '" onclick="Molpy.Ready(\'' + ammo[i] + '\')"></input>';
-						}
-					}
-					if (!counts) {
-						str += 'You don\'t have any suitable ammo!';
-						// badge? this is kind of hard to make happen
-					}
-				} else if (!me.target) {
-					Molpy.BuildGlows();
-					Molpy.CheckCaps();
-					var stuffs = Molpy.stuffs;
-					var counts = 0;
-					str += '<br>Currently loaded with ' + me.chamber + '.';
-					str += '<br><b>Aim</b> the Glowitzer at<br>';
-					if (me.chamber == 'Moondust') {
-						for (key in Molpy.glows) {
-							if (Molpy.glows[key].mdcheck()) {
-								counts++;
-								str += '<center><small><input type="Button" value="' + me.formatName(key);
-								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></small></center>';
-							}
-						}
-					}
-					if (me.chamber == 'Starstuff' || me.chamber == 'uSols') {
-						for (key in Molpy.glows) {
-							if (Molpy.glows[key].sscheck()) {
-								counts++;
-								str += '<center><input type="Button" value="' + me.formatName(key);
-								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
-							}
-						}
-					}
-					if (me.chamber == 'Antiquanta') {
-						for (key in Molpy.glows) {
-							if (Molpy.glows[key].aqcheck()) {
-								counts++;
-								str += '<center><input type="Button" value="' + me.formatName(key);
-								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
-							}
-						}
-					}
-					if (me.chamber == 'Tachyons') {
-						for (key in Molpy.glows) {
-							if (Molpy.glows[key].tccheck()) {
-								counts++;
-								str += '<center><input type="Button" value="' + me.formatName(key);
-								str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
-							}
-						}
-					}
-					if (!counts) {
-						str += 'No valid target!';
-						
-					}
-				} else {
-					str += '<br>Currently loaded with ' + me.chamber + ' and aimed at ' + me.target + '.';
-					str += '<br><input type="Button" value="Fire" onclick="Molpy.Fire()"></input>';
-					str += ' the Glowitzer!';
-				}
+		name: 'Glowitzer',
+		icon: 'glowitzer',
+		className: 'action',
+		desc: function(me) {
+			var str = '';
+			if (!me.bought) {
+				str += 'Fires stuff at things for reasons.';
 				return str;
-			},
-			group: 'lunar',
-			price: {
-				Sand: 1,
-			},
-			ammo: ['Moondust', 'Starstuff', 'uSols', 'Antiquanta', 'Tachyons'],
-			factors: {
-				'Starstuff': 1.2,
-				'uSols': 2.0,
-				'Antiquanta': 0.0,
-				'Tachyons': Infinity,
-			},
-			chamber: '',
-			target: '',
-			caps: [],
-			formatName: function(stuff) {
-				if (stuff == 'Logicat') return 'the Logicat';
-				if (stuff == 'Vacuum') return 'Vacuums';
-				if (stuff == 'QQ') return 'Qubes';
-				if (stuff == 'exp') return 'EXP';
-				if (stuff == 'Shards') return 'Shards';
-				if (stuff == 'Panes') return 'Panes';
-				return stuff;
-			},
-			defSave: 1,
-			saveData: {
-				4: ['chamber', '', 'string'],
-				5: ['target', '', 'string'],
-				6: ['caps', 0, 'array'],
+			}
+			str += 'Load it with various celestial bits and fire it at something for certain effects. Experiment!';
+			if (Molpy.Got('Overglare')) {
+				str += '<br>The Glowitzer is currently cooling. It will be ready to fire in ';
+				str += Molpify(Molpy.Boosts['Overglare'].countdown) + ' mNP.';
+				return str;
+			}	
+			if (!me.chamber) {
+				var counts = 0;
+				var ammo = me.ammo
+				str += '<br><b>Load</b> the Glowitzer with';
+				for (i = 0; i < ammo.length; i++) {
+					if (Molpy.Got(ammo[i]) && Molpy.Boosts[ammo[i]].power) {
+						counts++;
+						str += '<br><input type="Button" value="' + ammo[i] + '" onclick="Molpy.Ready(\'' + ammo[i] + '\')"></input>';
+					}
+				}
+				if (!counts) {
+					str += 'You don\'t have any suitable ammo!';
+					// badge? this is kind of hard to make happen
+				}
+			} else if (!me.target) {
+				Molpy.BuildGlows();
+				Molpy.CheckCaps();
+				var stuffs = Molpy.stuffs;
+				var counts = 0;
+				str += '<br>Currently loaded with ' + me.chamber + '.';
+				str += '<br><b>Aim</b> the Glowitzer at<br>';
+				if (me.chamber == 'Moondust') {
+					for (key in Molpy.glows) {
+						if (Molpy.glows[key].mdcheck()) {
+							counts++;
+							str += '<center><small><input type="Button" value="' + me.formatName(key);
+							str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></small></center>';
+						}
+					}
+				}
+				if (me.chamber == 'Starstuff' || me.chamber == 'uSols') {
+					for (key in Molpy.glows) {
+						if (Molpy.glows[key].sscheck()) {
+							counts++;
+							str += '<center><input type="Button" value="' + me.formatName(key);
+							str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
+						}
+					}
+				}
+				if (me.chamber == 'Antiquanta') {
+					for (key in Molpy.glows) {
+						if (Molpy.glows[key].aqcheck()) {
+							counts++;
+							str += '<center><input type="Button" value="' + me.formatName(key);
+							str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
+						}
+					}
+				}
+				if (me.chamber == 'Tachyons') {
+					for (key in Molpy.glows) {
+						if (Molpy.glows[key].tccheck()) {
+							counts++;
+							str += '<center><input type="Button" value="' + me.formatName(key);
+							str += '" onclick="Molpy.Aim(\'' + key + '\')"></input></center>';
+						}
+					}
+				}
+				if (!counts) {
+					str += 'No valid target!';
+					
+				}
+			} else {
+				str += '<br>Currently loaded with ' + me.chamber + ' and aimed at ' + me.target + '.';
+				str += '<br><input type="Button" value="Fire" onclick="Molpy.Fire()"></input>';
+				str += ' the Glowitzer!';
+			}
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		ammo: ['Moondust', 'Starstuff', 'uSols', 'Antiquanta', 'Tachyons'],
+		factors: {
+			'Starstuff': 1.2,
+			'uSols': 2.0,
+			'Antiquanta': 0.0,
+			'Tachyons': Infinity,
+		},
+		chamber: '',
+		target: '',
+		caps: [],
+		formatName: function(stuff) {
+			if (stuff == 'Logicat') return 'the Logicat';
+			if (stuff == 'Vacuum') return 'Vacuums';
+			if (stuff == 'QQ') return 'Qubes';
+			if (stuff == 'exp') return 'EXP';
+			if (stuff == 'Shards') return 'Shards';
+			if (stuff == 'Panes') return 'Panes';
+			return stuff;
+		},
+		defSave: 1,
+		saveData: {
+			4: ['chamber', '', 'string'],
+			5: ['target', '', 'string'],
+			6: ['caps', 0, 'array'],
 		}
 	});
 	
@@ -14134,66 +14206,64 @@ Molpy.Coallate = function(){
 // <input type="Button" value="Click" onclick="Molpy.ChromaticHeresyToggle()"></input>
 
 	new Molpy.Boost({
-			name: 'Overglare',
-			icon: 'overglare',
-			className: 'alert',
-			desc: function(me) {
-				var str = '';
-				str += 'The Glowitzer is cooling for ' + Molpify(me.countdown) + ' mNP';
-				return str;
-			},
-			group: 'lunar',
-			cds: {
-				Moondust: 3000,
-				Starstuff: 6000,
-				uSols: 12000,
-				Antiquanta: 5,
-				Tachyons: 3000,
-			},
-			startCountdown: function(me) {
-				return Molpy.Boosts['Overglare'].cds[Molpy.Boosts['Glowitzer'].chamber] * (Molpy.Got('DPCJ') ? 0.8 : 1);
-			}
+		name: 'Overglare',
+		icon: 'overglare',
+		className: 'alert',
+		desc: function(me) {
+			var str = '';
+			str += 'The Glowitzer is cooling for ' + Molpify(me.countdown) + ' mNP';
+			return str;
+		},
+		group: 'lunar',
+		cds: {
+			Moondust: 3000,
+			Starstuff: 6000,
+			uSols: 12000,
+			Antiquanta: 5,
+			Tachyons: 3000,
+		},
+		startCountdown: function(me) {
+			return Molpy.Boosts['Overglare'].cds[Molpy.Boosts['Glowitzer'].chamber] * (Molpy.Got('DPCJ') ? 0.8 : 1);
 		}
-	);
+	});
 
 	new Molpy.Boost({
-			name: 'Geiger Counter',
-			icon: 'geigercounter',
-			className: 'alert',
-			desc: function(me) {
-				var str = '';
-				if (!me.bought) {
-					str += 'Tracks excess radiation from the Glowitzer';
-					return str;
+		name: 'Geiger Counter',
+		icon: 'geigercounter',
+		className: 'alert',
+		desc: function(me) {
+			var str = '';
+			if (!me.bought) {
+				str += 'Tracks excess radiation from the Glowitzer';
+				return str;
+			}
+			var caps = Molpy.Boosts['Glowitzer'].caps;
+			var found = 0
+			Molpy.BuildGlows();
+			Molpy.CheckCaps();
+			for (var i = 0; i < caps.length; i++) {
+				if (caps[i][1]) {
+					found = 1;
 				}
-				var caps = Molpy.Boosts['Glowitzer'].caps;
-				var found = 0
-				Molpy.BuildGlows();
-				Molpy.CheckCaps();
+			}
+			if (found) {
+				Molpy.SortCaps();
+				str += 'The Glowitzer can\'t fire at the following targets until they reach the listed values.';
 				for (var i = 0; i < caps.length; i++) {
 					if (caps[i][1]) {
-						found = 1;
+						str += '<br><b>' + caps[i][0] + '</b>: ' + Molpify(caps[i][1]);
 					}
 				}
-				if (found) {
-					Molpy.SortCaps();
-					str += 'The Glowitzer can\'t fire at the following targets until they reach the listed values.';
-					for (var i = 0; i < caps.length; i++) {
-						if (caps[i][1]) {
-							str += '<br><b>' + caps[i][0] + '</b>: ' + Molpify(caps[i][1]);
-						}
-					}
-				} else {
-					str += 'No rads in sight!';
-				}
-				return str;
-			},
-			group: 'lunar',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+			} else {
+				str += 'No rads in sight!';
+			}
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
 
 	new Molpy.Boost({
 		name: 'uSols',
@@ -14242,27 +14312,26 @@ Molpy.Coallate = function(){
 	});
 
 	new Molpy.Boost({
-			name: 'Teleperiscope',
-			icon: 'teleperiscope',
-			desc: function(me) {
-				var str = '';
-				if (!me.bought) {
-					str += 'Lets you peek at what floor the next Spire boost will unlock on';
-					return str;
-				}
-				
-				if (!false) { // if not at top floor of Spire
-					str += '<input type="Button" value="Scan" onclick="Molpy.Peep()"></input>';
-					str += ' the stars!';
-				}
+		name: 'Teleperiscope',
+		icon: 'teleperiscope',
+		desc: function(me) {
+			var str = '';
+			if (!me.bought) {
+				str += 'Lets you peek at what floor the next Spire boost will unlock on';
 				return str;
-			},
-			group: 'lunar',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+			}
+			
+			if (!false) { // if not at top floor of Spire
+				str += '<input type="Button" value="Scan" onclick="Molpy.Peep()"></input>';
+				str += ' the stars!';
+			}
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
 
 	Molpy.Peep = function() {
 		Molpy.Anything = 1;
@@ -14284,84 +14353,260 @@ Molpy.Coallate = function(){
 		}
 	}
 	
-	new Molpy.Boost({
-			name: 'Robodjinn Manufactory',
-			alias: 'RDM',
-			icon: 'roboman',
+	Molpy.FromDust = function(alias) {
+		var stuff = Molpy.Boosts[alias];
+		new Molpy.Boost({
+			name: stuff.single + ' Djinn',
+			alias: alias + ' Djinn',
+			icon: stuff.alias.toLowerCase() + 'djinn',
+			group: 'djinn',
+			
 			desc: function(me) {
 				var str = '';
-				str += 'Imbues spare parts with animated spirits.';
-				if (me.bought) {
-					str += ' You can create one robodjinn for each unique stuff you possess, up to a limit of 1 per 10 Moon Spire floors.';
-					str += ' You currently have ' + me.power + ' robodjinn.';
-					
-					if (me.power >= Math.floor(Molpy.Boosts['Moon Spire'].Level/10)) {
-						str += ' You can\'t make any more.';
-						//return str;
-					}
-					str += ' Create a djinn with the spirit of: ';
-					for (var i = 0; i < Molpy.stuffs.length; i++) {
-						var stuff = Molpy.Boosts[Molpy.stuffs[i]];
-						if (Molpy.Got(stuff.alias) && stuff.Level >= 1 && ((me.bought & (1<<(i+1))) == 0)) {
-							// str += '<br><br>Create a' + (['exp','Otherness','Antiquanta'].indexOf(Molpy.stuffs[i]) > -1 ? 'n' : '') + ' ';
-							str += '<center><input class=smallbutton type="Button" onclick="Molpy.Animate('+i+')" value="'+stuff.plural+'" ></input></center>';
-						}
-					}				
+				var spec = Molpy.Boosts['Spectroscope'];
+				str += 'A robotic spirit wrought from the essence of ' + stuff.plural;
+				if (spec.piece && Molpy.NPImPart == spec.imag && !Molpy.Got('Robodjinn EVA')) {
+					var time = 2000 * Math.abs(Molpy.Boosts['Moon Spire'].location - spec.real);
+					str += '. <br><input type="Button" value="Send" onclick="Molpy.EVA(\'' + me.essence + '\', ' + time + ');"></input> this Robodjinn on an EVA';
+					str += ' to retrieve the piece of starstuff at NP ' + (spec.real ? spec.real + ' + ' : '') + spec.imag + 'i!';
+					str += ' It will return in ' + Molpify(time) + ' mNP... hopefully.';
 				}
 				return str;
 			},
-			group: 'lunar',
-			price: {
+			
+			price:{
 				Sand: 1,
 			},
-		}
-	);
+			
+			buyFunction: function() {
+				return;
+			},
+			unlockFunction: function() {
+				this.buy();
+			},
+			essence: stuff.alias,
+			role: 0, // 0 for none, 1 for EVA, 2 for robotemple pedastal, 3 for robotemple worship,
+			defSave: 1, 
+			saveData: {4:['role', 0, 'int']}
+		});
+	}
+	
+	for (var i = 0; i < Molpy.stuffs.length; i++) {
+		Molpy.FromDust(Molpy.stuffs[i]);
+	}
 
-	Molpy.Animate = function(index) {
-		Molpy.Anything = 1;
-		var stuff = Molpy.Boosts[Molpy.stuffs[index]];
-		var me = Molpy.Boosts['RDM'];
-		if ((me.bought & (1<<(index+1))) == 0) {
-			if (Molpy.Spend(stuff.alias, 1)) {
-				me.bought |= (1<<(index+1));
-				me.power += 1;
-				me.Refresh();
-				var str = 'You created a' + (['exp','Otherness','Antiquanta'].indexOf(Molpy.stuffs[index]) > -1 ? 'n' : '') + ' ';
-				str += stuff.single + ' robodjinn!';
-				Molpy.Notify(str);
-			} else {
-				Molpy.Notify('You don\'t have even a single ' + stuff.single + '...');
-			}
+	Molpy.djinn = [];
+	for (var i = 0; i < Molpy.BoostsById.length; i++) {
+		if (Molpy.BoostsById[i].essence) {
+			Molpy.djinn.push(Molpy.BoostsById[i]);
 		}
-		me.Refresh();
+	}
+
+	new Molpy.Boost({
+		name: 'Robodjinn Manufactory',
+		alias: 'RDM',
+		icon: 'roboman',
+		desc: function(me) {
+			var str = '';
+			str += 'Imbues spare parts with animated spirits.';
+			if (me.bought) {
+				str += ' You can create one robodjinn for each unique stuff you possess, up to a limit of 1 per 10 Moon Spire floors.';
+				str += ' You currently have ' + me.power + ' robodjinn.';
+				
+				if (Molpy.Summon().length >= Math.floor(Molpy.Boosts['Moon Spire'].Level/10)) {
+					str += ' You can\'t make any more.';
+					return str;
+				}
+				str += ' Create a djinn with the spirit of: ';
+				for (var i = 0; i < Molpy.stuffs.length; i++) {
+					var stuff = Molpy.Boosts[Molpy.stuffs[i]];
+					if (Molpy.Got(stuff.alias) && stuff.Level >= 1 && !Molpy.Got(stuff.alias + ' Djinn')) {
+						// str += '<br><br>Create a' + (['exp','Otherness','Antiquanta'].indexOf(Molpy.stuffs[i]) > -1 ? 'n' : '') + ' ';
+						str += '<center><input class=smallbutton type="Button" onclick="Molpy.Animate(\''+stuff.alias+'\')" value="'+stuff.plural+'" ></input></center>';
+					}
+				}				
+			}
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
+
+	Molpy.Animate = function(alias) {
+		Molpy.Anything = 1;
+		var stuff = Molpy.Boosts[alias];
+		if (Molpy.Spend(stuff.alias, 1)) {
+			var str = 'You created a' + (['exp','Otherness','Antiquanta'].indexOf(stuff.alias) > -1 ? 'n' : '') + ' ';
+			str += stuff.single + ' robodjinn';
+			Molpy.Notify(str, 1);
+			Molpy.UnlockBoost(stuff.alias + ' Djinn');
+		} else {
+			Molpy.Notify('You don\'t have even a single ' + stuff.single + '...', 1);
+		}
+		Molpy.Boosts['RDM'].Refresh();
 		return;
 	}
 	
 	Molpy.Summon = function() {
-		var rdm = Molpy.Boosts['RDM'];
-		var djinn = [];
-		for (var i = 0; i < Molpy.stuffs.length; i++) {
-			if (rdm.bought & (1<<(i+1))) {
-				djinn.push(Molpy.stuffs[i]);
+		var live = [];
+		for (var i = 0; i < Molpy.djinn.length; i++) {
+			if (Molpy.djinn[i].bought) {
+			live.push(Molpy.djinn[i]);
 			}
 		}
-		return djinn;
+		return live;
+	}
+
+	Molpy.Spare = function() {
+		var count = 0;
+		var live = Molpy.Summon();
+		for (var i = 0; i < live.length; i++) {
+			if (!live[i].role) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	Molpy.RefreshDjinn = function() {
+		var djinn = Molpy.Summon();
+		for (var i = 0; i < djinn.length; i++) {
+			djinn[i].Refresh();
+		}
 	}
 
 	new Molpy.Boost({
-			name: 'EVA Airlocks',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
+		name: 'Spectroscope',
+		icon: 'spectroscope',
+		desc: function(me) {
+			var str = '';
+			if (!me.bought) {
+				str += 'Opens your eyes to the multicolored heavens';
 				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
+			}
+			str += 'Locates the piece of starstuff nearest the tower.';
+			if (me.piece) {
+				str += '<br>You see a piece at NP ' + (me.real ? me.real + ' + ' : '') + me.imag + 'i.';
+			}
+			
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		buyFunction: function() {
+			Molpy.Starfall();
+			return;
+		},
+		classChange: function() {
+			return (this.piece ? 'alert' : '');
+		},
+		defSave: 1,
+		saveData: {
+			4: ['piece', 0, 'int'],
+			5: ['real', 0, 'int'],
+			6: ['imag', 0, 'int'],
+		},
+	});
+
+	Molpy.Starfall = function() {
+		Molpy.Anything = 1;
+		var real = 1 + flandom(8);
+		real *= GLRschoice([-1, 1]);
+		var imag = 1 + flandom(Molpy.Boosts['Moon Spire'].Level);
+		Molpy.Boosts['Spectroscope'].real = Molpy.Boosts['Moon Spire'].location + real;
+		Molpy.Boosts['Spectroscope'].imag = imag;
+		Molpy.Boosts['Spectroscope'].piece = 1;
+		return;
+	}
+
+	new Molpy.Boost({
+		name: 'EVA Airlocks',
+		icon: 'airlocks',
+		desc: function(me) {
+			var str = '';
+			str += 'Lets your Robodjinn embark upon EVA missions to retrieve stardust';
+			str += (Molpy.Got('Spectroscope') ? '' : ' ...if only you knew where any was.');
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
+	
+	Molpy.EVA = function(essence, time) {
+		Molpy.Anything = 1;
+		var djinn = Molpy.Summon();
+		for (var i = 0; i < djinn.length; i++) {
+			if (djinn[i].essense == essence) {
+				djinn[i].role = 1;
+				break;
+			}
+		Molpy.GiveTempBoost('Robodjinn EVA', 0, time);
+		Molpy.Boosts['Robodjinn EVA'].findEssence();
+		Molpy.RefreshDjinn();
 		}
-	);
+		return;
+	}
+
+	new Molpy.Boost({
+		name: 'Robodjinn EVA',
+		icon: 'robodjinneva',
+		className: 'alert',
+		desc: function(me) {
+			var str = '';
+			if (!me.essence) {
+				me.findEssence();
+			}
+			str += 'The ' + Molpy.Boosts[me.essence].single + ' robodjinn is presently on an EVA mission and will return in ' + Molpify(me.countdown) + ' mNP...';
+			str += '<small>probably</small>';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		findEssence: function() {
+			var djinn = Molpy.Summon();
+			for (var i = 0; i < djinn.length; i++) {
+				if (djinn[i].role == 1) {
+					this.essence = djinn[i].essence;
+				}
+			}
+		},
+		lockFunction: function() {
+			if (!this.essence) {
+				this.findEssence();
+			}
+			var djinn = Molpy.Summon();
+			for (var i = 0; i < djinn.length; i++) {
+				if (djinn[i].role == 1) {
+					djinn[i].role == 0;
+				}
+			}
+			var success = (Molpy.Got('RRB') ? 0.95 : 0.8);
+			if (Math.random() > success) {
+				Molpy.LockBoost(this.essence + ' Djinn');
+				Molpy.Notify('The ' + Molpy.Boosts[this.essence].single + ' robodjinn never came home...', 1);
+			} else {
+				if (Molpy.NPImPart) {
+					Molpy.Add('Starstuff', 1);
+					Molpy.Notify('The ' + Molpy.Boosts[this.essence].single + ' robodjinn has returned with one starstuff!', 1);
+					Molpy.Notify('Welcome home, little buddy');
+				} else {
+					Molpy.Boosts['EVA Airlocks'].power++;
+					Molpy.Notify('The ' + Molpy.Boosts[this.essence].single + ' robodjinn has returned, leaving one starstuff for you in your Moon Spire', 1);
+				}
+			}
+			Molpy.Boosts['Spectroscope'].piece = 0;
+			Molpy.Starfall();
+			Molpy.RefreshDjinn();
+		},
+	});
 
 	new Molpy.Boost({
 			name: 'Titan Treads',
@@ -14411,6 +14656,21 @@ Molpy.Coallate = function(){
 	new Molpy.Boost({
 			name: 'Robodjinn Retrieval Belt',
 			alias: 'RRB',
+			icon: '',
+			desc: function(me) {
+				var str = '';
+				str += '';
+				return str;
+			},
+			group: '',
+			price: {
+				Sand: 1,
+			},
+		}
+	);
+	
+	new Molpy.Boost({
+			name: 'Dronesong',
 			icon: '',
 			desc: function(me) {
 				var str = '';

@@ -408,7 +408,7 @@ Molpy.DefineGUI = function() {
 	Molpy.RepaintLootSelection = function() {
 		Molpy.lootSelectionNeedRepaint = 0;
 		var str = '';
-		var groups = ['boosts', 'stuff', 'land', 'ninj', 'cyb', 'hpt', 'bean', 'chron', 'dimen', 'lunar', 'ceil', 'drac', 'prize', 'varie','faves'];
+		var groups = ['boosts', 'stuff', 'land', 'ninj', 'cyb', 'hpt', 'bean', 'chron', 'dimen', 'lunar', 'djinn', 'ceil', 'drac', 'prize', 'varie','faves'];
 		for( var i in groups) {
 			str += Molpy.PaintLootToggle(groups[i], 4);
 		}
@@ -1379,7 +1379,7 @@ Molpy.DefineGUI = function() {
 		} else {
 			$('#toggleTFCounts').removeClass('hidden');
 		}
-		var str='Newpix'+(Molpy.newpixNumber<0?' -':' ') + (Math.floor(Math.abs(Molpy.newpixNumber)));
+		var str='Newpix'+(Molpy.newpixNumber<0?' -':' ') + (Math.floor(Math.abs(Molpy.newpixNumber))) + (Molpy.NPImPart ? ' + ' + Molpy.NPImPart + 'i':'');
 		if(Molpy.currentStory>=0){str=str+[' of t1i'][Molpy.currentStory]}
 		g('newpixnum').innerHTML = str
 		g('eon').innerHTML = Molpy.TimeEon;
