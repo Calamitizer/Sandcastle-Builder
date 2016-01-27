@@ -1291,8 +1291,18 @@ Molpy.Up = function() {
 		};
 		Molpy.Add = function(stuff, amount, s) {
 			Molpy.Anything = 1;
+			amount = EvalMaybeFunction(amount, 0, 1)
+			if (Molpy.stuffs.indexOf(stuff) > -1) {
+				var dj = amount * Molpy.DjinnFactor(stuff);
+				if (stuff != 'Gold') {
+					amount = Math.floor(amount);
+					amount += (Math.random() < (dj % 1))
+				} else {
+					amount = dj;
+				}
+			}
 			var b = Molpy.Boosts[stuff];
-			return b && b.Add(EvalMaybeFunction(amount, 0, 1), s);
+			return b && b.Add(amount, s);
 		};
 		Molpy.Spend = function(stuff, amount, s) {
 			Molpy.Anything = 1;
@@ -1420,6 +1430,7 @@ Molpy.Up = function() {
 			// .logic allows unlock by logicat (this is not a saved value)
 			// .photo for photovolt sysem
 			// .kitten for boosts that are from kittens and not logicats
+			// .spire for moon spire boosts (.spire[0] is the floor, .spire[1] is the unlock condition)
 			this.id = Molpy.BoostN;
 			this.order = this.id;
 			if(order) this.order = order + this.id / 1000; //(because the order we create them can't be changed after we save)
