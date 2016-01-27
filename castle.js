@@ -3848,6 +3848,13 @@ Molpy.Up = function() {
 		}
 
 		Molpy.Boosts['Glass Trolling'].IsEnabled = 0;
+		
+		if (Molpy.Got('Dronesong') && Molpy.Got('Spire Construction')) {
+			var factor = 1 + (-.01 * Molpy.Spare().length);
+			var con = Molpy.Boosts['Spire Construction'];
+			con.countdown = Math.max(1, con.countdown * factor);
+		}
+		
 		Molpy.Boosts['Now Where Was I?'].Refresh();
 		if (!Molpy.Got('Permanent Staff') || !Molpy.IsEnabled('Permanent Staff')) Molpy.Boosts['The Pope'].reset();
 		Molpy.MakeSomethingUp();

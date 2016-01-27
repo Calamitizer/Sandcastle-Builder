@@ -13926,6 +13926,20 @@ Molpy.Coallate = function(){
 		Molpy.GiveTempBoost('Spire Construction', 0, riser.reqtime(), 0);
 		return;
 	}
+	
+	Molpy.Rise = function() {
+		Molpy.Anything = 1;
+		var riser = Molpy.Boosts['Moon Spire'];
+		if (!riser.location) {
+			if (Molpy.currentStory != -1 || Molpy.newpixNumber == 0) {
+				Molpy.Notify('This is no place to build. Go home.');
+				return;
+			}
+			riser.location = Molpy.newpixNumber;
+		}
+		Molpy.GiveTempBoost('Spire Construction', 0, riser.reqtime());
+		return;
+	}
 
 	new Molpy.Boost({
 		name: 'Spire Construction',
@@ -14496,7 +14510,7 @@ Molpy.Coallate = function(){
 		var count = 0;
 		var live = Molpy.Summon();
 		for (var i = 0; i < live.length; i++) {
-			if (!live[i].role) {
+			if (live[i].role == 0) {
 				count++;
 			}
 		}
@@ -14939,19 +14953,18 @@ Molpy.Coallate = function(){
 	});	
 	
 	new Molpy.Boost({
-			name: 'Dronesong',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+		name: 'Dronesong',
+		icon: 'dronesong',
+		desc: function(me) {
+			var str = '';
+			str += 'ONGing reduces the construction countdown, based on the number of inactive djinn';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
 
 	new Molpy.Boost({
 			name: 'fAI',
