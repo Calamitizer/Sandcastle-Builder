@@ -14403,7 +14403,7 @@ Molpy.Coallate = function(){
 			unlockFunction: function() {
 				this.buy();
 			},
-			essence: stuff.alias,
+			essence: alias,
 			classChange: function() {
 				var spec = Molpy.Boosts['Spectroscope'];
 				if (spec.piece && Molpy.NPImPart == spec.imag && !Molpy.Got('Robodjinn EVA')) {
@@ -14573,16 +14573,10 @@ Molpy.Coallate = function(){
 	
 	Molpy.EVA = function(essence, time) {
 		Molpy.Anything = 1;
-		var djinn = Molpy.Summon();
-		for (var i = 0; i < djinn.length; i++) {
-			if (djinn[i].essense == essence) {
-				djinn[i].role = 1;
-				break;
-			}
+		Molpy.Boosts[essence + ' Djinn'].role = 1;
+		Molpy.Boosts['Robodjinn EVA'].essence;
 		Molpy.GiveTempBoost('Robodjinn EVA', 0, time);
-		Molpy.Boosts['Robodjinn EVA'].findEssence();
 		Molpy.RefreshDjinn();
-		}
 		return;
 	}
 
@@ -14621,7 +14615,7 @@ Molpy.Coallate = function(){
 					djinn[i].role = 0;
 				}
 			}
-			var success = (Molpy.Got('RRB') ? 0.95 : 0.8);
+			var success = (Molpy.IsEnabled('RRB') ? 0.95 : 0.8);
 			if (Math.random() > success) {
 				Molpy.LockBoost(this.essence + ' Djinn');
 				Molpy.Notify('The ' + Molpy.Boosts[this.essence].single + ' robodjinn never came home...', 1);
@@ -14927,20 +14921,22 @@ Molpy.Coallate = function(){
 	}
 
 	new Molpy.Boost({
-			name: 'Robodjinn Retrieval Belt',
-			alias: 'RRB',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+		name: 'Robodjinn Retrieval Belt',
+		alias: 'RRB',
+		icon: 'rrb',
+		className: 'toggle',
+		desc: function(me) {
+			var str = '';
+			str += (me.IsEnabled ? 'F' : 'When active, f') + 'astens to your djinn while they are on EVA missions';
+			if (me.bought) str += '<br><input type="Button" onclick="Molpy.GenericToggle(' + me.id + ')" value="' + (me.IsEnabled ? 'Dea' : 'A') + 'ctivate"></input>';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		IsEnabled: Molpy.BoostFuncs.BoolPowEnabled,
+	});	
 	
 	new Molpy.Boost({
 			name: 'Dronesong',
