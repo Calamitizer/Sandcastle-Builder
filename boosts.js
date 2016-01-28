@@ -13870,7 +13870,7 @@ Molpy.Coallate = function(){
 			Molpy.Notify('Collected ' + Molpify(al.power) + ' starstuff from EVAs!', 1);
 			al.power = 0;
 		}
-		var sr = Molpy.Boosts['Stellar Refinery';
+		var sr = Molpy.Boosts['Stellar Refinery'];
 		if (sr.power) {
 			Molpy.Add('uSols', sr.power);
 			Molpy.Notify('Collected ' + Molpify(sr.power) + ' μSols from the refinery!', 1);

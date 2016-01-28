@@ -3633,6 +3633,7 @@ Molpy.Up = function() {
 		if (fai.sols) {
 			if (Molpy.Has('Starstuff, 30') && !Molpy.Got('Nucleosynthesis')) {
 				Molpy.Refine();
+			}
 		}
 		if (fai.anti) {
 			
