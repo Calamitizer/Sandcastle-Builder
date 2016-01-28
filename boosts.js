@@ -13918,16 +13918,6 @@ Molpy.Coallate = function(){
 	});
 
 	Molpy.Rise = function() {
-		var riser = Molpy.Boosts['Moon Spire'];
-		Molpy.LockBoost('Spire Work Order');
-		if (!riser.location && Molpy.newpixNumber != 0) {
-			riser.location = Molpy.newpixNumber;	
-		}
-		Molpy.GiveTempBoost('Spire Construction', 0, riser.reqtime(), 0);
-		return;
-	}
-	
-	Molpy.Rise = function() {
 		Molpy.Anything = 1;
 		var riser = Molpy.Boosts['Moon Spire'];
 		if (!riser.location) {
@@ -13937,6 +13927,7 @@ Molpy.Coallate = function(){
 			}
 			riser.location = Molpy.newpixNumber;
 		}
+		Molpy.LockBoost('Spire Work Order');
 		Molpy.GiveTempBoost('Spire Construction', 0, riser.reqtime());
 		return;
 	}
@@ -13971,7 +13962,7 @@ Molpy.Coallate = function(){
 		
 		lockFunction: function() {
 			Molpy.Boosts['Moon Spire'].Level++;
-			Molpy.Notify('Construction of floor ' + Molpy.Boosts['Moon Spire'].Level + ' has completed!');
+			Molpy.Notify('Construction of floor ' + Molpy.Boosts['Moon Spire'].Level + ' has completed!', 1);
 			Molpy.RewardSpire();
 		},
 		countdowncheck: function() {
@@ -14385,8 +14376,7 @@ Molpy.Coallate = function(){
 				if (me.role == 0) {
 					str += '. '
 					if (spec.piece && Molpy.NPImPart == spec.imag && !Molpy.Got('Robodjinn EVA')) {
-						var time = 2000 * Math.abs(Molpy.Boosts['Moon Spire'].location - spec.real);
-						str += '.<br><input type="Button" value="Send" onclick="Molpy.EVA(\'' + me.essence + '\', ' + time + ');"></input> this Robodjinn on an EVA';
+						str += '.<br><input type="Button" value="Send" onclick="Molpy.EVA(\'' + me.essence + '\');"></input> this Robodjinn on an EVA';
 						str += ' to retrieve the piece of starstuff at NP ' + (spec.real ? spec.real + ' + ' : '') + spec.imag + 'i!';
 						str += ' It will return in ' + Molpify(time) + ' mNP... hopefully.';
 					}
@@ -14505,6 +14495,17 @@ Molpy.Coallate = function(){
 		}
 		return live;
 	}
+	
+	Molpy.RoleCall = function(r) {
+		var djinn = Molpy.Summon();
+		var availdjinn = [];
+		for (var i = 0; i < djinn.length; i++) {
+			if (djinn[i].role == r) {
+				availdjinn.push(djinn[i]);
+			}
+		}
+		return availdjinn;
+		}
 
 	Molpy.Spare = function() {
 		var count = 0;
@@ -14585,8 +14586,9 @@ Molpy.Coallate = function(){
 		},
 	});
 	
-	Molpy.EVA = function(essence, time) {
+	Molpy.EVA = function(essence) {
 		Molpy.Anything = 1;
+		var time = 100 * Math.abs(Molpy.Boosts['Moon Spire'].location - Molpy.Boosts['Spectroscope'].real);
 		Molpy.Boosts[essence + ' Djinn'].role = 1;
 		Molpy.Boosts['Robodjinn EVA'].essence;
 		Molpy.GiveTempBoost('Robodjinn EVA', 0, time);
@@ -14612,23 +14614,13 @@ Molpy.Coallate = function(){
 			Sand: 1,
 		},
 		findEssence: function() {
-			var djinn = Molpy.Summon();
-			for (var i = 0; i < djinn.length; i++) {
-				if (djinn[i].role == 1) {
-					this.essence = djinn[i].essence;
-				}
-			}
+			this.essence = Molpy.RoleCall(1)[0].essence;
 		},
 		lockFunction: function() {
 			if (!this.essence) {
 				this.findEssence();
 			}
-			var djinn = Molpy.Summon();
-			for (var i = 0; i < djinn.length; i++) {
-				if (djinn[i].role == 1) {
-					djinn[i].role = 0;
-				}
-			}
+			Molpy.RoleCall(1)[0].role = 0
 			var success = (Molpy.IsEnabled('RRB') ? 0.95 : 0.8);
 			if (Math.random() > success) {
 				Molpy.LockBoost(this.essence + ' Djinn');
@@ -14808,12 +14800,7 @@ Molpy.Coallate = function(){
 			Sand: 1,
 		},
 		findEssence: function() {
-			var djinn = Molpy.Summon();
-			for (var i = 0; i < djinn.length; i++) {
-				if (djinn[i].role == 2) {
-					this.essence = djinn[i].essence;
-				}
-			}
+			this.essence = Molpy.RoleCall(2)[0].essence;
 		},
 		buyFunction: function() {
 			Molpy.UnlockBoost('Litany of Wax');
@@ -14919,13 +14906,7 @@ Molpy.Coallate = function(){
 			return 1;
 		}
 		if (role == 2) { // pedestal
-			var cult = 0;
-			var djinn = Molpy.Summon();
-			for (var i = 0; i < djinn.length; i++) {
-				if (djinn[i].role == 3) {
-					cult++;
-				}
-			}
+			var cult = Molpy.RoleCall(3).length;
 			return (1.05 + 0.01*cult);
 		}
 		if (role == 3) { // temple
@@ -14967,19 +14948,81 @@ Molpy.Coallate = function(){
 	});
 
 	new Molpy.Boost({
-			name: 'fAI',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
+		name: '*fAI',
+		icon: 'fai',
+		className: 'action',
+		desc: function(me) {
+			var str = '';
+			if (!me.bought) {
+				str += 'Automatically performs certain actions and is generally a nice person';
 				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
+			}
+			str += 'I am currently ' + (me.build ? '' : '<b>not</b> ') + 'constructing the Moon Spire.';
+			str += ' <input type="Button" onclick="Molpy.SwitchAI(\'build\')" value="Toggle"></input>';
+			if (Molpy.Got('ADB')) {
+				str += '<br><br>I am currently ' + (me.eva ? '' : '<b>not</b> ') + ' sending djinn on EVAs.';
+				str += ' <input type="Button" onclick="Molpy.SwitchAI(\'eva\')" value="Toggle"></input>';
+			}
+			if (Molpy.Boosts['EVA Airlocks'].power) {
+				str += '<br>I have ' + Molpify(Molpy.Boosts['EVA Airlocks'].power) + ' piece';
+				str += (Molpy.Boosts['EVA Airlocks'].power == 1 ? '' : 's') + ' of starstuff for you in the Moon Spire.';
+			}
+			if (Molpy.Got('S&C Missle Array')) {
+				str += '<br><br>I am currently ' + (me.click ? '' : '<b>not</b> ') + ' clicking kitties for you.';
+				str += ' <input type="Button" onclick="Molpy.SwitchAI(\'click\')" value = "Toggle"></input>';
+				str += '<br>I have enough missiles to click ' + Molpify(Molpy.Boosts['S&C Missle Array'].power) + ' kitt';
+				str += (Molpy.Boosts['S&C Missle Array'].power == 1 ? 'y' : 'ies') + ' per NP.';
+			}
+			if (Molpy.Got('Starfeed')) {
+				str += '<br><br>I am currently ' + (me.sols ? '' : '<b>not</b> ') + ' feeding the stellar refinery.';
+				str += ' <input type="Button" onclick="Molpy.SwitchAI(\'sols\')" value="Toggle"></input>';
+			}
+			if (Molpy.Boosts['Stellar Refinery'].power) {
+				str += '<br>I have ' + Molpify(Molpy.Boosts['Stellar Refinery'].power) + ' μSol';
+				str += (Molpy.Boosts['Stellar Refinery'].power == 1 ? '' : 's') + ' for you in the Moon Spire.';
+			}
+			if (Molpy.Got('Enter the Void')) {
+				str += '<br><br>I am currently ' + (me.anti ? '' : '<b>not</b> ') + ' running the gravitometric confinement chamber.';
+				str += ' <input type="Button" onclick="Molpy.SwitchAI(\'anti\')" value="Toggle"></input>';
+			}
+			if (Molpy.Boosts['GravChamber'].power) {
+				str += '<br>I have ' + Molpify(Molpy.Boosts['GravChamber'].power) + ' antiquant';
+				str += (Molpy.Boosts['GravChamber'].power == 1 ? 'um' : 'a') + ' for you in the Moon Spire.';
+			}
+			if (Molpy.Got('FTL Conduction')) {
+				str += '<br><br>I am currently ' + (me.tach ? '' : '<b>not</b> ') + ' cycling the retroaccelerator..';
+				str += ' <input type="Button" onclick="Molpy.SwitchAI(\'tach\')" value="Toggle"></input>';
+			}
+			if (Molpy.Boosts['Retroaccelerator'].power) {
+				str += '<br>I have ' + Molpify(Molpy.Boosts['Retroaccelerator'].power) + ' tachyon';
+				str += (Molpy.Boosts['Retroaccelerator'].power == 1 ? '' : 's') + ' for you in the Moon Spire.';
+			}
+			return str;
+		},
+		stats: '"It\'s pronounce like Faye. It stands for friendly artificial intelligence. \'Friendly\' is actually a technical term. The star is silent! It just denotes that I\'m an AI."',
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		defSave: 1,
+		saveData: {
+			4:['build', 1, 'int'],
+			5:['eva', 0, 'int'],
+			6:['click', 0, 'int'],
+			7:['sols', 0, 'int'],
+			8:['anti', 0, 'int'],
+			9:['tach', 0, 'int'],
 		}
-	);
+	});
+	
+	Molpy.SwitchAI = function(action) {
+		Molpy.Anything = 1;
+		var fai = Molpy.Boosts['*fAI'];
+		fai[action] = 1 - fai[action];
+
+		Molpy.Boosts['*fAI'].Refresh();
+		return;
+	}
 
 	new Molpy.Boost({
 			name: 'Stellar Refinery',
@@ -15013,20 +15056,33 @@ Molpy.Coallate = function(){
 	);
 	
 	new Molpy.Boost({
-			name: 'And It Don\'t Stop',
-			alias: 'NoStop',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+		name: 'And It Don\'t Stop',
+		alias: 'NoStop',
+		icon: '',
+		desc: function(me) {
+			var str = '';
+			str += '';
+			return str;
+		},
+		group: '',
+		price: {
+			Sand: 1,
+		},
+	});
+	
+	new Molpy.Boost({
+		name: 'Spud Cannon',
+		icon: '',
+		desc: function(me) {
+			var str = '';
+			str += '';
+			return str;
+		},
+		group: '',
+		price: {
+			Sand: 1,
+		},
+	});
 
 	new Molpy.Boost({
 			name: 'Dual Piezo Cooling Jets',

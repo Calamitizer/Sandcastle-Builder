@@ -3393,8 +3393,13 @@ Molpy.Up = function() {
 			}
 		}
 
-		Molpy.Dust();
-
+		if (Molpy.Got('Moondrizzle')) {
+			Molpy.Dust();
+		}
+		if (Molpy.Got('*fAI')) {
+			Molpy.Execute();
+		}
+		
 		Molpy.Boosts['GlassBlocks'].calculateBlocksPermNP();
 		Molpy.Boosts['GlassChips'].calculateChipsPermNP();
 
@@ -3606,6 +3611,37 @@ Molpy.Up = function() {
 				if (dust >= .8 * riser.reqtime() * riser.mdcost()) Molpy.UnlockBoost('Spire Work Order')
 			}
 		}
+		return;
+	}
+	
+	Molpy.Execute = function() {
+		var fai = Molpy.Boosts['*fAI'];
+		if (fai.build) {
+			if (Molpy.Boosts['Spire Work Order'].unlocked && !Molpy.Got('Spire Construction')) {
+				Molpy.Boosts['Spire Work Order'].buy();
+				Molpy.Rise();
+			}
+		}
+		if (fai.eva) {
+			if (Molpy.Boosts['Spectroscope'].piece && !Molpy.Got('Robodjinn EVA')) {
+				var availdjinn = Molpy.RoleCall(0);
+				Molpy.EVA(GLRschoice(availdjinn).essence);
+			}
+		}
+		if (fai.click) {
+			// bwah
+		}
+		if (fai.sols) {
+			
+		}
+		if (fai.anti) {
+			
+		}
+		if (fai.tach) {
+			
+		}
+		fai.Refresh();
+		return;
 	}
 
 	Molpy.PerformJudgement = function() {
@@ -3850,11 +3886,11 @@ Molpy.Up = function() {
 		Molpy.Boosts['Glass Trolling'].IsEnabled = 0;
 		
 		if (Molpy.Got('Dronesong') && Molpy.Got('Spire Construction')) {
-			var factor = 1 + (-.01 * Molpy.Spare().length);
+			var factor = 1 + (-.01 * Molpy.Spare().length); // if we ever get ~50 stuffs, change this
 			var con = Molpy.Boosts['Spire Construction'];
 			con.countdown = Math.max(1, con.countdown * factor);
-		}
-		
+		}		
+
 		Molpy.Boosts['Now Where Was I?'].Refresh();
 		if (!Molpy.Got('Permanent Staff') || !Molpy.IsEnabled('Permanent Staff')) Molpy.Boosts['The Pope'].reset();
 		Molpy.MakeSomethingUp();
