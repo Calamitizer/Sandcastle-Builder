@@ -13867,10 +13867,17 @@ Molpy.Coallate = function(){
 		var al = Molpy.Boosts['EVA Airlocks'];
 		if (al.power) {
 			Molpy.Add('Starstuff', al.power);
-			Molpy.Notify('Collected ' + al.power + ' starstuff from EVAs!', 1);
+			Molpy.Notify('Collected ' + Molpify(al.power) + ' starstuff from EVAs!', 1);
 			al.power = 0;
 		}
-		Molpy.Boosts['Moon Spire'].Refresh()
+		var sr = Molpy.Boosts['Stellar Refinery';
+		if (sr.power) {
+			Molpy.Add('uSols', sr.power);
+			Molpy.Notify('Collected ' + Molpify(sr.power) + ' μSols from the refinery!', 1);
+			sr.power = 0;
+		}
+		Molpy.Boosts['Moon Spire'].Refresh();
+		Molpy.Boosts['*fAI'].Refresh();
 		return;
 	}
 
@@ -15060,7 +15067,7 @@ Molpy.Coallate = function(){
 		className: 'alert',
 		desc: function(me) {
 			var str = '';
-			str += 'Your refinery is currently crushing stars. The μSol will be complete in ' + Molpify(me.countdown) + '.';
+			str += 'Your refinery is currently crushing stars. The μSol will be complete in ' + Molpify(me.countdown) + ' mNP.';
 			return str;
 		},
 		group: 'lunar',
@@ -15068,22 +15075,30 @@ Molpy.Coallate = function(){
 			Sand: 1,
 		},
 		lockFunction: function() {
-			Molpy.Add('uSols', 1);
+			if (Molpy.NPImPart) {
+				Molpy.Add('uSols', 1);
+				Molpy.Notify('The refinery has produced one μSol', 1);
+			} else {
+				Molpy.Boosts['Stellar Refinery'].power++;
+				Molpy.Notify('The refinery has finished producing a μSol, which is presently waiting for you in the Moon Spire', 1);
+			}
 			Molpy.Boosts['Stellar Refinery'].Refresh();
 		},
-		countdown: 5000,
+		startCountdown: function() {
+			return 5000;
+		},
 	});
 
 	new Molpy.Boost({
 		name: 'Automated Deployment Bay',
 		alias: 'ADB',
-		icon: '',
+		icon: 'adb',
 		desc: function(me) {
 			var str = '';
-			str += '';
+			str += 'Enables *fAI to send djinn on EVAs';
 			return str;
 		},
-		group: '',
+		group: 'lunar',
 		price: {
 			Sand: 1,
 		},
