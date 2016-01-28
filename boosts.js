@@ -15148,34 +15148,84 @@ Molpy.Coallate = function(){
 	});
 	
 	new Molpy.Boost({
-		name: 'Spud Cannon',
-		icon: '',
+		name: 'Starspud Cannon',
+		icon: 'starspudcannon',
 		desc: function(me) {
 			var str = '';
-			str += '';
+			str += 'Fires stuff in the Moon Spire to your location';
+			if (!me.bought) {
+				return str;
+			}
+			str += ' at the cost of one starstuff';
+			if (Molpy.Boosts['EVA Airlocks'].power) {
+				str += '<br><input type="Button" value="Launch" onclick="Molpy.Launch(\'Starstuff\')">' + ' one starstuff';
+			}
+			if (Molpy.Boosts['Stellar Refinery'].power) {
+				str += '<br><input type="Button" value="Launch" onclick="Molpy.Launch(\'uSols\')">' + ' one μSol';
+			}
+			if (Molpy.Boosts['GravChamber'].power) {
+				str += '<br><input type="Button" value="Launch" onclick="Molpy.Launch(\'Antiquanta\')">' + ' one antiquantum';
+			}
+			if (Molpy.Boosts['Retroaccelerator'].power) {
+				str += '<br><input type="Button" value="Launch" onclick="Molpy.Launch(\'Tachyons\')">' + ' one tachyon';
+			}
 			return str;
 		},
-		group: '',
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
+	
+	Molpy.Launch = function(alias) {
+		Molpy.Anything = 1;
+		var cost = (alias == 'Starstuff' ? 2 : 1);
+		var place = {
+			Starstuff: Molpy.Boosts['EVA Airlocks'],
+			uSols: Molpy.Boosts['Stellar Refinery'],
+			Antiquanta: Molpy.Boosts['GravChamber'],
+			Tachyons: Molpy.Boosts['Retroaccelerator'],
+		};
+		if (Molpy.Spend('Starstuff'), 1) {
+			place[alias].power--;
+			Molpy.Add(alias, 1);
+		} else {
+			Molpy.Notify('You\'re out of starstuff');
+		}
+		// place[alias].Refresh(); // actually not really necessary 
+		Molpy.Boosts['Starspud Cannon'].Refresh();
+		Molpy.Boosts['*fAI'].Refresh();
+		return;
+	}
+
+	new Molpy.Boost({
+		name: 'Mooncatcher',
+		icon: 'mooncatcher',
+		desc: function(me) {
+			var str = '';
+			str += 'When at the top floor of the Moon Spire, moondust collection is boosted by the Spire\'s height';
+			return str;
+		},
+		group: 'lunar',
 		price: {
 			Sand: 1,
 		},
 	});
 
 	new Molpy.Boost({
-			name: 'Dual Piezo Cooling Jets',
-			alias: 'DPCJ',
-			icon: 'dpcj',
-			desc: function(me) {
-				var str = '';
-				str += 'Cools the Glowitzer and lowers Overglare\'s refresh time';
-				return str;
-			},
-			group: 'lunar',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+		name: 'Dual Piezo Cooling Jets',
+		alias: 'DPCJ',
+		icon: 'dpcj',
+		desc: function(me) {
+			var str = '';
+			str += 'Cools the Glowitzer and lowers Overglare\'s refresh time';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
 
 	new Molpy.Boost({
 			name: 'Starfeed',
