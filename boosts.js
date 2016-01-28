@@ -15216,7 +15216,7 @@ Molpy.Coallate = function(){
 			str += 'Idle djinn will collect moondust';
 			return str;
 		},
-		group: '',
+		group: 'lunar',
 		price: {
 			Sand: 1,
 		},
@@ -15239,13 +15239,13 @@ Molpy.Coallate = function(){
 
 	new Molpy.Boost({
 		name: 'Starfeed',
-		icon: '',
+		icon: 'starfeed',
 		desc: function(me) {
 			var str = '';
-			str += '';
+			str += 'Enables *fAI to automate the stellar refinery';
 			return str;
 		},
-		group: '',
+		group: 'lunar',
 		price: {
 			Sand: 1,
 		},
