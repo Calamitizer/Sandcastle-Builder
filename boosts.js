@@ -14612,7 +14612,7 @@ Molpy.Coallate = function(){
 			if (!me.essence) {
 				me.findEssence();
 			}
-			str += 'The ' + Molpy.Boosts[me.essence].single + ' robodjinn is presently on an EVA mission and will return in ' + Molpify(me.countdown) + ' mNP...';
+			str += 'The ' + Molpy.Boosts[me.essence].single + ' robodjinn has been sent on an EVA mission and will return in ' + Molpify(me.countdown) + ' mNP...';
 			str += '<small>probably</small>';
 			return str;
 		},
@@ -14651,25 +14651,43 @@ Molpy.Coallate = function(){
 	new Molpy.Boost({
 		name: 'Titan Treads',
 		icon: 'titantreads',
+		className: 'action',
 		desc: function(me) {
 			var str = '';
 			str += 'Carries the Spire between NPs';
 			if (me.bought){
 				if (Molpy.Got('Moon Over')) {
 					str += 'The Spire is currently on the move.';
+				}
+				if (!Molpy.Got('Moon Over') || (Molpy.Got('NoStop') && (Math.abs(Molpy.Boosts['NoStop'].power) < 64))) {
+					str += '. Command the Spire to roll:';
+					str += '<br><input type="Button" onclick="Molpy.Traverse(-1)" value="<" ></input>'
+					str += '<input type="Button" onclick="Molpy.Traverse(+1)" value=">" ></input>'
+				
+				}
+				
+				
+				if (Molpy.Got('Moon Over') || (Molpy.Got('NoStop') && Math.abs(Molpy.Boosts['NoStop'].power) < 64)) {
+					str += 'The Spire is currently on the move.';
 				} else {
-					if (Molpy.NPImPart == 1) {
+					if (Molpy.NPImPart) {
 						str += '. Command the Spire to roll';
 						str += '<br><input type="Button" onclick="Molpy.Traverse(-1)" value="<" ></input>'
 						str += '<input type="Button" onclick="Molpy.Traverse(+1)" value=">" ></input>'
 					}
 				}
 			}
+			
+			
+			
 			return str;
 		},
 		group: 'lunar',
 		price: {
 			Sand: 1,
+		},
+		classChange: function() {
+			return 
 		},
 	});
 	
@@ -14680,7 +14698,14 @@ Molpy.Coallate = function(){
 			Molpy.Notify('Do not pass 0. Do not collect $200.', 1);
 			return;
 		}
-		Molpy.GiveTempBoost('Moon Over',dir,15);
+		if (!Molpy.Got('Moon Over')) {
+			Molpy.GiveTempBoost('Moon Over', dir, Molpy.Boosts['Moon Over'].time);
+		} else {
+			Molpy.Boosts['Moon Over'].power += dir;
+			Molpy.Boosts['Moon Over'].countdown += Molpy.Boosts['Moon Over'].time;
+		}
+		Molpy.Boosts['Titan Treads'].Refresh();
+		Molpy.Boosts['Moon Over'].Refresh();
 		// Molpy.Notify('The Spire has embarked towards NP ' + (Molpy.newpixNumber + dir));
 		return;
 	}
@@ -14690,13 +14715,15 @@ Molpy.Coallate = function(){
 		icon: 'moonover',
 		desc: function(me) {
 			var str = '';
-			str += 'The Moon Spire has embarked to NP ' + (Molpy.newpixNumber + me.power) + '. It will get there in ' + Molpify(me.countdown) + ' mNP.';
+			str += 'The Moon Spire has embarked to NP ' + (Molpy.Boosts['Moon Spire'].location + me.power) + '. It will get there in ' + Molpify(me.countdown) + ' mNP.';
 			return str;
 		},
 		group: 'lunar',
 		lockFunction: function() {
 			Molpy.Boosts['Moon Spire'].location += this.power;
-			Molpy.newpixNumber += this.power;
+			if (Molpy.NPImPart) {
+				Molpy.newpixNumber += this.power;
+			}
 			Molpy.Boosts['Titan Treads'].power++;
 			Molpy.Boosts['Titan Treads'].Refresh();
 			this.power = 0;
@@ -14704,6 +14731,7 @@ Molpy.Coallate = function(){
 		price: {
 			Sand: 1,
 		},
+		time: 15,
 	});
 	
 	new Molpy.Boost({
@@ -15106,14 +15134,14 @@ Molpy.Coallate = function(){
 	
 	new Molpy.Boost({
 		name: 'And It Don\'t Stop',
-		alias: 'NoStop',
-		icon: '',
+		alias: 'NoStop', // I don't want to use the acronym...
+		icon: 'nostop',
 		desc: function(me) {
 			var str = '';
-			str += '';
+			str += 'Lets you queue up Spire movement';
 			return str;
 		},
-		group: '',
+		group: 'lunar',
 		price: {
 			Sand: 1,
 		},
