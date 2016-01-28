@@ -14514,15 +14514,8 @@ Molpy.Coallate = function(){
 		return availdjinn;
 		}
 
-	Molpy.Spare = function() {
-		var count = 0;
-		var live = Molpy.Summon();
-		for (var i = 0; i < live.length; i++) {
-			if (live[i].role == 0) {
-				count++;
-			}
-		}
-		return count;
+	Molpy.Spare = function() { // I should delete this; RoleCall() came after
+		return Molpy.RoleCall(0).length;
 	}
 
 	Molpy.RefreshDjinn = function() {
@@ -14645,6 +14638,7 @@ Molpy.Coallate = function(){
 			Molpy.Boosts['Spectroscope'].piece = 0;
 			Molpy.Starfall();
 			Molpy.RefreshDjinn();
+			Molpy.Boosts['Starspud Cannon'].Refresh();
 		},
 	});
 
@@ -15111,6 +15105,7 @@ Molpy.Coallate = function(){
 				Molpy.Notify('The refinery has finished producing a μSol, which is presently waiting for you in the Moon Spire', 1);
 			}
 			Molpy.Boosts['Stellar Refinery'].Refresh();
+			Molpy.Boosts['Starspud Cannon'].Refresh();
 		},
 		startCountdown: function() {
 			return 5000;
@@ -15150,6 +15145,7 @@ Molpy.Coallate = function(){
 	new Molpy.Boost({
 		name: 'Starspud Cannon',
 		icon: 'starspudcannon',
+		className: 'alert',
 		desc: function(me) {
 			var str = '';
 			str += 'Fires stuff in the Moon Spire to your location';
@@ -15186,7 +15182,7 @@ Molpy.Coallate = function(){
 			Antiquanta: Molpy.Boosts['GravChamber'],
 			Tachyons: Molpy.Boosts['Retroaccelerator'],
 		};
-		if (Molpy.Spend('Starstuff'), 1) {
+		if (Molpy.Spend('Starstuff', 1)) {
 			place[alias].power--;
 			Molpy.Add(alias, 1);
 		} else {
@@ -15213,6 +15209,20 @@ Molpy.Coallate = function(){
 	});
 
 	new Molpy.Boost({
+		name: 'Cyberdrizzle',
+		icon: 'cyberdrizzle',
+		desc: function(me) {
+			var str = '';
+			str += 'Idle djinn will collect moondust';
+			return str;
+		},
+		group: '',
+		price: {
+			Sand: 1,
+		},
+	});
+
+	new Molpy.Boost({
 		name: 'Dual Piezo Cooling Jets',
 		alias: 'DPCJ',
 		icon: 'dpcj',
@@ -15228,19 +15238,18 @@ Molpy.Coallate = function(){
 	});
 
 	new Molpy.Boost({
-			name: 'Starfeed',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+		name: 'Starfeed',
+		icon: '',
+		desc: function(me) {
+			var str = '';
+			str += '';
+			return str;
+		},
+		group: '',
+		price: {
+			Sand: 1,
+		},
+	});
 
 	new Molpy.Boost({
 			name: 'S&C Missle Array',

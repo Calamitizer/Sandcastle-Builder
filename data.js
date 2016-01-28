@@ -1116,6 +1116,7 @@ Molpy.BuildSpireRewards = function() {
 	Molpy.Boosts['Geiger Counter'].spire = [10, function() {return Molpy.Boosts['Geiger Counter'].power >= 6}];
 	Molpy.Boosts['Teleperiscope'].spire = [15];
 	Molpy.Boosts['RDM'].spire = [20, function() {return Molpy.CastleTools['NewPixBot'].price == Infinity || isNaN(Molpy.CastleTools['NewPixBot'].price)}];
+	Molpy.Boosts['Cyberdrizzle'].spire = [30];
 	Molpy.Boosts['EVA Airlocks'].spire = [35];
 	Molpy.Boosts['Titan Treads'].spire = [42];
 	Molpy.Boosts['Grapple Mortar'].spire = [50];

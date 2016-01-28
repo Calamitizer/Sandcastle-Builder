@@ -3604,7 +3604,14 @@ Molpy.Up = function() {
 			var dust = Molpy.Boosts['Moondust'].power
 			var riser = Molpy.Boosts['Moon Spire']
 			var driz = 1;
-			Molpy.Add('Moondust', driz);
+			if (Molpy.Got('Cyberdrizzle')) {
+				driz *= 1 + Molpy.RoleCall(0).length;
+			}
+			if (Molpy.Got('Mooncatcher') && Molpy.NPImPart == riser.Level) {
+				driz += riser.Level/10;
+			}
+			var amount = Math.floor(driz) + (Math.random() < (driz % 1));
+			Molpy.Add('Moondust', amount);
 			if (dust >= 5000) Molpy.UnlockBoost('Moon Spire')
 			if (Molpy.Got('Moon Spire') && !Molpy.Got('Spire Work Order') && !Molpy.Got('Spire Construction')) {
 				if (dust >= .8 * riser.reqtime() * riser.mdcost()) Molpy.UnlockBoost('Spire Work Order')
