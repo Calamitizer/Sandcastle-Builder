@@ -2999,7 +2999,6 @@ Molpy.Up = function() {
 			for (var i = 0; i < Molpy.BoostsById.length; i++) {
 				var boost = Molpy.BoostsById[i];
 				if (boost.spire && boost.spire[0] <= riser.Level && !boost.unlocked) {
-					Molpy.Notify(boost.name);
 					availrewards.push(boost);
 				}
 			}

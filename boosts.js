@@ -14274,8 +14274,8 @@ Molpy.Coallate = function(){
 	});
 
 	new Molpy.Boost({
-		name: 'uSols',
-		title: 'μSols',
+		name: 'μSols',
+		alias: 'uSols',
 		single: 'μSols',
 		plural: 'μSols',
 		icon: 'usols',
@@ -15025,35 +15025,69 @@ Molpy.Coallate = function(){
 	}
 
 	new Molpy.Boost({
-			name: 'Stellar Refinery',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
+		name: 'Stellar Refinery',
+		icon: 'stellarrefinery',
+		className: 'action',
+		desc: function(me) {
+			var str = '';
+			str += 'Condenses starstuff beyond the Fermi pressure';
+			if (me.bought && Molpy.Has('Starstuff', 30) && !Molpy.Got('Nucleosynthesis')) {
+				str += '.<br><input type="Button" value="Activate" onclick="Molpy.Refine()"><br>';
+			}
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		classChange: function() {
+			return ((Molpy.Has('Starstuff', 30) && !Molpy.Got('Nucleosynthesis')) ? 'action' : '');
 		}
-	);
+	});
+
+	Molpy.Refine = function() {
+		Molpy.Anything = 1;
+		if (Molpy.Spend('Starstuff', 50)) {
+			Molpy.GiveTempBoost('Nucleosynthesis');
+		}
+		Molpy.Boosts['Stellar Refinery'].Refresh()
+		return;
+	}
 
 	new Molpy.Boost({
-			name: 'Automated Deployment Bay',
-			alias: 'ADB',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+		name: 'Nucleosynthesis',
+		icon: 'nucleosynthesis',
+		className: 'alert',
+		desc: function(me) {
+			var str = '';
+			str += 'Your refinery is currently crushing stars. The μSol will be complete in ' + Molpify(me.countdown) + '.';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		lockFunction: function() {
+			Molpy.Add('uSols', 1);
+			Molpy.Boosts['Stellar Refinery'].Refresh();
+		},
+		countdown: 5000,
+	});
+
+	new Molpy.Boost({
+		name: 'Automated Deployment Bay',
+		alias: 'ADB',
+		icon: '',
+		desc: function(me) {
+			var str = '';
+			str += '';
+			return str;
+		},
+		group: '',
+		price: {
+			Sand: 1,
+		},
+	});
 	
 	new Molpy.Boost({
 		name: 'And It Don\'t Stop',
