@@ -14999,8 +14999,8 @@ Molpy.Coallate = function(){
 			if (Molpy.Got('S&C Missle Array')) {
 				str += '<br><br>I am currently ' + (me.click ? '' : '<b>not</b> ') + ' clicking kitties for you.';
 				str += ' <input type="Button" onclick="Molpy.SwitchAI(\'click\')" value = "Toggle"></input>';
-				str += '<br>I have enough missiles to click ' + Molpify(Molpy.Boosts['S&C Missle Array'].power) + ' kitt';
-				str += (Molpy.Boosts['S&C Missle Array'].power == 1 ? 'y' : 'ies') + ' per NP.';
+				str += '<br>I have enough missiles to click ' + Molpify(Molpy.Boosts['S&C Missle Array'].Level) + ' kitt';
+				str += (Molpy.Boosts['S&C Missle Array'].Level == 1 ? 'y' : 'ies') + ' per NP.';
 			}
 			if (Molpy.Got('Starfeed')) {
 				str += '<br><br>I am currently ' + (me.sols ? '' : '<b>not</b> ') + ' feeding the stellar refinery.';
@@ -15061,7 +15061,7 @@ Molpy.Coallate = function(){
 			var str = '';
 			str += 'Condenses starstuff beyond the Fermi pressure';
 			if (me.bought && Molpy.Has('Starstuff', 30) && !Molpy.Got('Nucleosynthesis')) {
-				str += '.<br><input type="Button" value="Activate" onclick="Molpy.Refine()"><br>';
+				str += '.<br><input type="Button" value="Activate" onclick="Molpy.Refine()"> 30 starstuff into 1 μSol';
 			}
 			return str;
 		},
@@ -15071,7 +15071,7 @@ Molpy.Coallate = function(){
 		},
 		classChange: function() {
 			return ((Molpy.Has('Starstuff', 30) && !Molpy.Got('Nucleosynthesis')) ? 'action' : '');
-		}
+		},
 	});
 
 	Molpy.Refine = function() {
@@ -15252,26 +15252,104 @@ Molpy.Coallate = function(){
 	});
 
 	new Molpy.Boost({
-			name: 'S&C Missle Array',
+		name: 'S&C Missle Array',
+		icon: 'misslearray',
+		desc: function(me) {
+			var str = '';
+			str += 'Enables *fAI to click ' + Molpy.Redacted.words;
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
+
+	new Molpy.Boost({
+		name: 'Nippy',
+		icon: 'nippy',
+		desc: function(me) {
+			var str = '';
+			str += 'Redacted clicking sometimes reduces the Overglare cooldown';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
+
+	new Molpy.Boost({
+		name: 'Gravitometric Confinement Chamber',
+		alias: 'GravChamber',
+		className: 'action',
+		icon: 'gravchamber',
+		desc: function(me) {
+			var str = '';
+			str += 'Combines μSols to singularity and isolates the remains as antiquanta';
+			if (!me.bought) {
+				return str;
+			}
+			if (Molpy.Got('uSols', 8) && !Molpy.Got('Annihilator')) {
+				str += '<br><input type="Button" value="Meld" onclick="Molpy.Meld()"> 8 μSols together';
+			}
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		classChange: function() {
+			return ((Molpy.Has('uSols', 8) && !Molpy.Got('Annihilator')) ? 'action' : '');
+		},
+	});
+
+	Molpy.Meld = function() {
+		Molpy.Anything = 1;
+		if (Molpy.Spend('uSols', 8)) {
+			Molpy.GiveTempBoost('Annihilator');
+		}
+		Molpy.Boosts['GravChamber'].Refresh();
+		return;	
+	}
+
+	new Molpy.Boost({
+		name: 'Annihilator',
+		icon: 'annihilator',
+		className: 'alert',
+		desc: function(me) {
+			var str = '';
+			str += 'The μSols are in the process of merging. Singularity will occur in ' + Molpify(me.countdown) + ' mNP';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		lockFunction: function() {
+			var amount = 1 + flandom(Math.pow(2,16));
+			if (Molpy.NPImPart) {
+				Molpy.Add('Antiquanta', amount);
+				Molpy.Notify('The μSol annihilation has produced' + Molpify(amount) + ' antiquant' + (amount == 1 ? 'um' : 'a'));
+			} else {
+				Molpy.Boosts['GravChamber'].power += amount;
+				Molpy.Notify('The μSol annihilation has finished producing antiquanta, which are waiting for you in the Moon Spire');
+				Molpy.Boosts['Starspud Cannon'].Refresh();
+			}
+			Molpy.Boosts['GravChamber'].Refresh();
+		},
+		startCountdown: function() {
+			return 50000;
+		},
+	});
+
+	new Molpy.Boost({
+			name: 'Occam\'s Shield',
+			alias: 'OccamShield',
 			icon: '',
 			desc: function(me) {
 				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
-
-	new Molpy.Boost({
-			name: 'Nippy',
-			icon: 'nippy',
-			desc: function(me) {
-				var str = '';
-				str += 'Redacted clicking sometimes reduces the Overglare cooldown';
+				str += 'Penetrates the ';
 				return str;
 			},
 			group: 'lunar',
@@ -15280,33 +15358,17 @@ Molpy.Coallate = function(){
 			},
 		}
 	);
-
+	
 	new Molpy.Boost({
-			name: 'Gravitometric Confinement Chamber',
-			alias: 'GravChamber',
-			icon: '',
+			name: 'Novikov\'s Glaive',
+			alias: 'Novikov',
+			icon: 'novikov',
 			desc: function(me) {
 				var str = '';
-				str += '';
+				str += 'Penetrates';
 				return str;
 			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
-
-	new Molpy.Boost({
-			name: 'Occam\'s Shield',
-			alias: 'OccamShield',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
+			group: 'lunar',
 			price: {
 				Sand: 1,
 			},
@@ -15363,7 +15425,7 @@ Molpy.Coallate = function(){
 			icon: 'ftlc',
 			desc: function(me) {
 				var str = '';
-				str += 'Quarters the Overglare cooldown at the cost of a tachyon';
+				str += 'Zeroes the Overglare cooldown at the cost of a tachyon';
 				return str;
 			},
 			group: 'lunar',

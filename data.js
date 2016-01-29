@@ -1136,6 +1136,7 @@ Molpy.BuildSpireRewards = function() {
 	Molpy.Boosts['Nippy'].spire = [420];
 	Molpy.Boosts['GravChamber'].spire = [500]; // make AQ // Gravitometric Confinement Chamber
 	Molpy.Boosts['OccamShield'].spire = [600, function() {return Molpy.Earned('Absolute Zero')}];
+	Molpy.Boosts['Novikov'].spire = [700, function() {return Molpy.Got('OccamShield')}];
 	Molpy.Boosts['Enter the Void'].spire = [750];
 	Molpy.Boosts['Lunar Throne'].spire = [850];
 	Molpy.Boosts['Retroaccelerator'].spire = [1000, function() {return Molpy.Boosts['Moon Spire'].location == 0}]; // make tach
