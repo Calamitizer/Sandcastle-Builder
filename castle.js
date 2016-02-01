@@ -3620,6 +3620,12 @@ Molpy.Up = function() {
 			if (dust >= .8 * riser.reqtime() * riser.mdcost()) Molpy.UnlockBoost('Spire Work Order')
 		}
 		
+		if (Molpy.Got('reinter')) {
+			var p = Molpy.Boosts['reinter'].chance();
+			if (Math.random() < p) {
+				Molpy.LockBoost('reinter');
+			}
+		}
 		return;
 	}
 	
@@ -3897,7 +3903,7 @@ Molpy.Up = function() {
 		Molpy.Boosts['Glass Trolling'].IsEnabled = 0;
 		
 		if (Molpy.Got('Dronesong') && Molpy.Got('Spire Construction')) {
-			var factor = 1 + (-.01 * Molpy.Spare().length); // if we ever get ~50 stuffs, change this
+			var factor = 1 + (-.01 * Molpy.Spare().length); // if we ever get ~100 stuffs, change this, although we will probably have bigger problems
 			var con = Molpy.Boosts['Spire Construction'];
 			con.countdown = Math.max(1, con.countdown * factor);
 		}		

@@ -13878,8 +13878,20 @@ Molpy.Coallate = function(){
 		var sr = Molpy.Boosts['Stellar Refinery'];
 		if (sr.power) {
 			Molpy.Add('uSols', sr.power);
-			Molpy.Notify('Collected ' + Molpify(sr.power) + ' μSols from the refinery!', 1);
+			Molpy.Notify('Collected ' + Molpify(sr.power) + ' μSol' + plural(sr.power) + ' from the refinery!', 1);
 			sr.power = 0;
+		}
+		var gc = Molpy.Boosts['GravChamber'];
+		if (gc.power) {
+			Molpy.Add('Antiquanta', gc.power);
+			Molpy.Notify('Collected ' + Molpify(gc.power) + ' antiquant' + (gc.power == 1 ? 'um' : 'a') + ' from the gravity chamber!', 1);
+			gc.power = 0;
+		}
+		var ra = Molpy.Boosts['Retroaccelerator'];
+		if (ra.power) {
+			Molpy.Add('Tachyons', ra.power);
+			Molpy.Notify('Collected ' + Molpify(ra.power) + ' tachyon' + plural(ra.power) + ' from the retroaccelerator!', 1);
+			ra.power = 0;
 		}
 		Molpy.Boosts['Moon Spire'].Refresh();
 		Molpy.Boosts['*fAI'].Refresh();
@@ -14084,7 +14096,7 @@ Molpy.Coallate = function(){
 			'Starstuff': 1.2,
 			'uSols': 2.0,
 			'Antiquanta': 0.0,
-			'Tachyons': Infinity,
+			'Tachyons': 5.0,
 		},
 		chamber: '',
 		target: '',
@@ -14638,6 +14650,7 @@ Molpy.Coallate = function(){
 				} else {
 					Molpy.Boosts['EVA Airlocks'].power++;
 					Molpy.Notify('The ' + Molpy.Boosts[this.essence].single + ' robodjinn has returned, leaving one starstuff for you in your Moon Spire', 1);
+					Molpy.Boosts['Starspud Cannon'].Refresh();
 				}
 			}
 			this.power++;
@@ -14648,7 +14661,7 @@ Molpy.Coallate = function(){
 			Molpy.Boosts['Spectroscope'].piece = 0;
 			Molpy.Starfall();
 			Molpy.RefreshDjinn();
-			Molpy.Boosts['Starspud Cannon'].Refresh();
+			Molpy.Boosts['*fAI'].Refresh();
 		},
 	});
 
@@ -15032,7 +15045,7 @@ Molpy.Coallate = function(){
 			}
 			return str;
 		},
-		stats: '"It\'s pronounce like Faye. It stands for friendly artificial intelligence. \'Friendly\' is actually a technical term. The star is silent! It just denotes that I\'m an AI."',
+		stats: '"It\'s pronounce like Faye. It stands for friendly artificial intelligence. \'They\' pronouns, please. \'Friendly\' is actually a technical term. The star is silent! It just denotes that I\'m an AI."',
 		group: 'lunar',
 		price: {
 			Sand: 1,
@@ -15341,6 +15354,7 @@ Molpy.Coallate = function(){
 				Molpy.Boosts['Starspud Cannon'].Refresh();
 			}
 			Molpy.Boosts['GravChamber'].Refresh();
+			Molpy.Boosts['*fAI'].Refresh();
 		},
 		startCountdown: function() {
 			return 50000;
@@ -15399,6 +15413,9 @@ Molpy.Coallate = function(){
 		desc: function(me) {
 			var str = '';
 			str += 'Doubles the Papal bonus';
+			if (me.bought) {
+				str += '. Stuff for the stuff god!';
+			}
 			return str;
 		},
 		group: 'lunar',
@@ -15409,13 +15426,19 @@ Molpy.Coallate = function(){
 
 	new Molpy.Boost({
 		name: 'Retroaccelerator',
-		icon: '',
+		icon: 'retroaccelerator',
 		desc: function(me) {
 			var str = '';
-			str += '';
+			str += 'Smashes antiquanta together, producing tachyons... eventually';
+			if (!me.bought) {
+				return str;
+			}
+			if (!Molpy.Got('reinter') && Molpy.Has('Antiquanta', 2e9)) {
+				var x = 2
+			}
 			return str;
 		},
-		group: '',
+		group: 'lunar',
 		price: {
 			Sand: 1,
 		},
@@ -15437,10 +15460,24 @@ Molpy.Coallate = function(){
 		},
 		unlockFunction: function() {
 			this.buy();
-		}
+		},
 		lockFunction: function() {
-			return;
-		}
+			var amount = 1;
+			if (Molpy.NPImPart) {
+				Molpy.Add('Tachyons', amount);
+				Molpy.Notify('The retroaccelerator has detected and captured ' + Molpify(amount) + ' tachyon' + plural(amount));
+			} else {
+				Molpy.Boosts['Retroaccelerator'].power += amount;
+				Molpy.Notify('The retroaccelerator has captured ' + Molpify(amount) + ' tachyon' + plural(amount) + ', waiting for you in the Moon Spire');
+				Molpy.Boosts['Starspud Cannon'].Refresh();
+			}
+			Molpy.Boosts['Retroaccelerator'].Refresh();
+			Molpy.Boosts['*fAI'].Refresh();
+		},
+		chance: function() {
+			var p = 6e-6;
+			return p;
+		},
 	});
 
 	new Molpy.Boost({
