@@ -3398,6 +3398,9 @@ Molpy.Up = function() {
 		if (Molpy.Got('*fAI')) {
 			Molpy.Execute();
 		}
+		if (Molpy.Got('reinter')) {
+			var x = 2;
+		}
 		
 		Molpy.Boosts['GlassBlocks'].calculateBlocksPermNP();
 		Molpy.Boosts['GlassChips'].calculateChipsPermNP();
@@ -3600,23 +3603,23 @@ Molpy.Up = function() {
 	}
 
 	Molpy.Dust = function() {
-		if (Molpy.Got('Moondrizzle')) {
-			var dust = Molpy.Boosts['Moondust'].power
-			var riser = Molpy.Boosts['Moon Spire']
-			var driz = 1;
-			if (Molpy.Got('Cyberdrizzle')) {
-				driz *= 1 + Molpy.RoleCall(0).length;
-			}
-			if (Molpy.Got('Mooncatcher') && Molpy.NPImPart == riser.Level) {
-				driz += riser.Level/10;
-			}
-			var amount = Math.floor(driz) + (Math.random() < (driz % 1));
-			Molpy.Add('Moondust', amount);
-			if (dust >= 5000) Molpy.UnlockBoost('Moon Spire')
-			if (Molpy.Got('Moon Spire') && !Molpy.Got('Spire Work Order') && !Molpy.Got('Spire Construction')) {
-				if (dust >= .8 * riser.reqtime() * riser.mdcost()) Molpy.UnlockBoost('Spire Work Order')
-			}
+		var dust = Molpy.Boosts['Moondust'].power
+		var riser = Molpy.Boosts['Moon Spire']
+		var driz = 1;
+		if (Molpy.Got('Cyberdrizzle')) {
+			driz *= 1 + Molpy.RoleCall(0).length;
 		}
+		if (Molpy.Got('Mooncatcher') && Molpy.NPImPart == riser.Level) {
+			driz += riser.Level/10;
+		}
+		var amount = Math.floor(driz) + (Math.random() < (driz % 1));
+		amount = Math.floor(amount * Molpy.Papal('Dust'));
+		Molpy.Add('Moondust', amount);
+		if (dust >= 5000) Molpy.UnlockBoost('Moon Spire')
+		if (Molpy.Got('Moon Spire') && !Molpy.Got('Spire Work Order') && !Molpy.Got('Spire Construction')) {
+			if (dust >= .8 * riser.reqtime() * riser.mdcost()) Molpy.UnlockBoost('Spire Work Order')
+		}
+		
 		return;
 	}
 	

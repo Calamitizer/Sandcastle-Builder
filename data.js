@@ -1132,13 +1132,13 @@ Molpy.BuildSpireRewards = function() {
 	Molpy.Boosts['Starspud Cannon'].spire = [200];
 	Molpy.Boosts['DPCJ'].spire = [225]; // Dual Piezo Coolant Jets
 	Molpy.Boosts['Starfeed'].spire = [250];
-	Molpy.Boosts['S&C Missle Array'].spire = [300]; // clicks cats, upgrade every 20 floors
+	Molpy.Boosts['S&C Missle Array'].spire = [300]; // clicks cats, upgrade every 50? floors
 	Molpy.Boosts['Nippy'].spire = [420];
 	Molpy.Boosts['GravChamber'].spire = [500]; // make AQ // Gravitometric Confinement Chamber
 	Molpy.Boosts['OccamShield'].spire = [600, function() {return Molpy.Earned('Absolute Zero')}];
-	Molpy.Boosts['Novikov'].spire = [700, function() {return Molpy.Got('OccamShield')}];
-	Molpy.Boosts['Enter the Void'].spire = [750];
-	Molpy.Boosts['Lunar Throne'].spire = [850];
+	Molpy.Boosts['Novikov'].spire = [700, function() {return Molpy.Boosts['Moon Spire'].location == 0}];
+	Molpy.Boosts['Enter the Void'].spire = [750, function() {return Molpy.Got['GravChamber']}];
+	Molpy.Boosts['Lunar Throne'].spire = [850, function() {return Molpy.Got('Permanent Staff')}];
 	Molpy.Boosts['Retroaccelerator'].spire = [1000, function() {return Molpy.Boosts['Moon Spire'].location == 0}]; // make tach
 	Molpy.Boosts['FTL Conduction'].spire = [1500];
 	Molpy.Boosts['Ansible Apportation'].spire = [2000];

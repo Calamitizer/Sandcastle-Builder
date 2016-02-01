@@ -9912,6 +9912,7 @@ Molpy.DefineBoosts = function() {
 		Diamonds: {desc:'XX% more Diamonds', value:1.1, avail: function() { return Molpy.DragonDigRate > 1e8 && isFinite(Molpy.Level('Diamonds')) }},
 		Master: {desc:'XX% less time for each masterpiece stage', value:0.9, avail: function() { return Molpy.groupBadgeCounts.diamm >= 10 }},
 		Shards: {desc: 'XX% more Dimension Shards from the camera', value: 1.1, avail: function() { return Molpy.Boosts['kitkat'].prey.length >= 180 }},
+		Dust: {desc: 'XX% more Moondust from the sky', value: 1.1, avail: function() { return Molpy.Boosts['Moon Spire'].Level > 150 }},
 		//: {desc:'', value:1.1, avail: function() {}},
 	}
 	Molpy.Hash = function(brown) {
@@ -9922,7 +9923,10 @@ Molpy.DefineBoosts = function() {
 	}
 	Molpy.Decreename = '';
 	Molpy.PapalBoostFactor = 1;
-	Molpy.SetPapalBoostFactor = function() { if (Molpy.Got('Hugo')) Molpy.PapalBoostFactor = 1 + (Molpy.BadgesOwned + (Molpy.groupBadgeCounts.diamm || 0)*6)/100000 };
+	Molpy.SetPapalBoostFactor = function() {
+		if (Molpy.Got('Hugo')) Molpy.PapalBoostFactor = 1 + (Molpy.BadgesOwned + (Molpy.groupBadgeCounts.diamm || 0)*6)/100000;
+		Molpy.PapalBoostFactor *= 1 + Molpy.Got('Lunar Throne');	
+	}
 
 	new Molpy.Boost({
 		name: 'The Pope',
@@ -12853,7 +12857,8 @@ Molpy.Coallate = function(){
 		price: {
 			Goats: Infinity,
 			Bonemeal: 1e95,
-			Shards: 5 * 1e9,
+			Shards: 5 * 1e45,
+			Panes: 5 * 10000,
 		}
 	});
 	new Molpy.Boost({
@@ -14635,6 +14640,11 @@ Molpy.Coallate = function(){
 					Molpy.Notify('The ' + Molpy.Boosts[this.essence].single + ' robodjinn has returned, leaving one starstuff for you in your Moon Spire', 1);
 				}
 			}
+			this.power++;
+			if (this.power > 256) {
+				var x = 2
+				// earn badge
+			}
 			Molpy.Boosts['Spectroscope'].piece = 0;
 			Molpy.Starfall();
 			Molpy.RefreshDjinn();
@@ -14659,21 +14669,7 @@ Molpy.Coallate = function(){
 					str += '<input type="Button" onclick="Molpy.Traverse(+1)" value=">" ></input>'
 				
 				}
-				
-				
-				if (Molpy.Got('Moon Over') || (Molpy.Got('NoStop') && Math.abs(Molpy.Boosts['NoStop'].power) < 64)) {
-					str += 'The Spire is currently on the move.';
-				} else {
-					if (Molpy.NPImPart) {
-						str += '. Command the Spire to roll';
-						str += '<br><input type="Button" onclick="Molpy.Traverse(-1)" value="<" ></input>'
-						str += '<input type="Button" onclick="Molpy.Traverse(+1)" value=">" ></input>'
-					}
-				}
 			}
-			
-			
-			
 			return str;
 		},
 		group: 'lunar',
@@ -14688,16 +14684,23 @@ Molpy.Coallate = function(){
 	Molpy.Traverse = function(dir) {
 		Molpy.Anything = 1;
 		var np = Molpy.newpixNumber;
+		var time = Molpy.Boosts['Moon Over'].time;
 		if ((Math.sign(np) == 1 && np + dir <= 0) || (Math.sign(np) == -1 && np + dir >= 0)) {
-			Molpy.Notify('Do not pass 0. Do not collect $200.', 1);
-			return;
+			if (!Molpy.Got('OccamShield')) {
+				Molpy.Notify('Do not pass 0. Do not collect $200.', 1);
+				return;
+			} else {
+				time = 1e5;
+				Molpy.Notify('The Moon Spire has begun tunneling into NP 0. It will succeed in... eventually.');
+			}
 		}
 		if (!Molpy.Got('Moon Over')) {
-			Molpy.GiveTempBoost('Moon Over', dir, Molpy.Boosts['Moon Over'].time);
+			Molpy.GiveTempBoost('Moon Over', dir, time);
 		} else {
 			Molpy.Boosts['Moon Over'].power += dir;
-			Molpy.Boosts['Moon Over'].countdown += Molpy.Boosts['Moon Over'].time;
+			Molpy.Boosts['Moon Over'].countdown += time;
 		}
+		Molpy.Boosts['Moon Over'].countdown = Math.min(1e5, Molpy.Boosts['Moon Over'].countdown);
 		Molpy.Boosts['Titan Treads'].Refresh();
 		Molpy.Boosts['Moon Over'].Refresh();
 		// Molpy.Notify('The Spire has embarked towards NP ' + (Molpy.newpixNumber + dir));
@@ -14707,6 +14710,7 @@ Molpy.Coallate = function(){
 	new Molpy.Boost({
 		name: 'Moon Over',
 		icon: 'moonover',
+		className: 'alert',
 		desc: function(me) {
 			var str = '';
 			str += 'The Moon Spire has embarked to NP ' + (Molpy.Boosts['Moon Spire'].location + me.power) + '. It will get there in ' + Molpify(me.countdown) + ' mNP.';
@@ -15327,7 +15331,7 @@ Molpy.Coallate = function(){
 			Sand: 1,
 		},
 		lockFunction: function() {
-			var amount = 1 + flandom(Math.pow(2,16));
+			var amount = Math.pow(1 + flandom(Math.pow(2,16)), 2);
 			if (Molpy.NPImPart) {
 				Molpy.Add('Antiquanta', amount);
 				Molpy.Notify('The μSol annihilation has produced' + Molpify(amount) + ' antiquant' + (amount == 1 ? 'um' : 'a'));
@@ -15346,10 +15350,10 @@ Molpy.Coallate = function(){
 	new Molpy.Boost({
 			name: 'Occam\'s Shield',
 			alias: 'OccamShield',
-			icon: '',
+			icon: 'occam',
 			desc: function(me) {
 				var str = '';
-				str += 'Penetrates the ';
+				str += 'Envelopes your Moon Spire in a protective barrier, enabling extratemporal penetration';
 				return str;
 			},
 			group: 'lunar',
@@ -15365,7 +15369,7 @@ Molpy.Coallate = function(){
 			icon: 'novikov',
 			desc: function(me) {
 				var str = '';
-				str += 'Penetrates';
+				str += '';
 				return str;
 			},
 			group: 'lunar',
@@ -15376,49 +15380,68 @@ Molpy.Coallate = function(){
 	);
 
 	new Molpy.Boost({
-			name: 'Enter the Void',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+		name: 'Enter the Void',
+		icon: 'enterthevoid',
+		desc: function(me) {
+			var str = '';
+			str += 'Enables *fAI to automate the Gravitometric Confinement Chamber';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
 
 	new Molpy.Boost({
-			name: 'Lunar Throne',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
-		}
-	);
+		name: 'Lunar Throne',
+		icon: 'lunarthrone',
+		desc: function(me) {
+			var str = '';
+			str += 'Doubles the Papal bonus';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+	});
 
 	new Molpy.Boost({
-			name: 'Retroaccelerator',
-			icon: '',
-			desc: function(me) {
-				var str = '';
-				str += '';
-				return str;
-			},
-			group: '',
-			price: {
-				Sand: 1,
-			},
+		name: 'Retroaccelerator',
+		icon: '',
+		desc: function(me) {
+			var str = '';
+			str += '';
+			return str;
+		},
+		group: '',
+		price: {
+			Sand: 1,
+		},
+	});
+	
+	new Molpy.Boost({
+		name: 'Reinterpretation Principle',
+		alias: 'reinter',
+		icon: 'reinter',
+		className: 'alert',
+		desc: function(me) {
+			var str = '';
+			str += 'The retroaccelerator is currently running, and will detect a tachyon... <i>eventually</i>';
+			return str;
+		},
+		group: 'lunar',
+		price: {
+			Sand: 1,
+		},
+		unlockFunction: function() {
+			this.buy();
 		}
-	);
+		lockFunction: function() {
+			return;
+		}
+	});
 
 	new Molpy.Boost({
 			name: 'FTL Conduction',
