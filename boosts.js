@@ -15485,7 +15485,7 @@ Molpy.Coallate = function(){
 			icon: 'ftlc',
 			desc: function(me) {
 				var str = '';
-				str += 'Zeroes the Overglare cooldown at the cost of a tachyon';
+				str += 'Zaps a resource to infinity, if you\'ve already reached infinity with it';
 				return str;
 			},
 			group: 'lunar',
